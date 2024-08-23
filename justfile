@@ -1,15 +1,21 @@
-APP_NAME := homelab_server
-
 set shell := ["bash", "-c"]
 
+APP_NAME := "homelab_server"
+main_path := "homelab.com/homelab-server/homeLab-server/cmd"
+
+build_args := "-v"
+
 build:
-    @echo "Building the application..."
-    go build -o {{APP_NAME}} .
+    @echo "Building the application {{APP_NAME}}..."
+    go build {{build_args}} -o {{APP_NAME}} {{main_path}}
 
 # Run the application
 run: build
     @echo "Running the application..."
     ./{{APP_NAME}}
+
+migrate:
+    @echo "Not implemented yet..."
 
 # Test the application
 test:

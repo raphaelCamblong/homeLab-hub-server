@@ -1,0 +1,44 @@
+package cache
+
+import (
+	"context"
+	"fmt"
+	"github.com/redis/go-redis/v9"
+	"homelab.com/homelab-server/homeLab-server/config"
+	"sync"
+)
+
+type redisDatabase struct {
+	client *redis.Client
+}
+
+var (
+	once        sync.Once
+	redisClient *redisDatabase
+)
+
+func NewRedisDatabase() (Database, error) {
+	once.Do(func() {
+		c := config.GetConfig()
+		addr := fmt.Sprintf("%s:%d", c.CacheDb.Host, c.CacheDb.Port)
+		client := redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: c.CacheDb.Password,
+			DB:       c.CacheDb.Channel,
+		})
+
+		pong, err := client.Ping(context.Background()).Result()
+		if err != nil {
+			panic(fmt.Errorf("failed to connect to Redis: %w", err)) // Change to proper error handling in production
+		}
+
+		fmt.Println("Successfully connected to Redis:", pong)
+		redisClient = &redisDatabase{client: client}
+	})
+
+	return redisClient, nil
+}
+
+func (r *redisDatabase) GetClient() *redis.Client {
+	return r.client
+}
