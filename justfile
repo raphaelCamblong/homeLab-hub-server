@@ -2,6 +2,7 @@ set shell := ["bash", "-c"]
 
 APP_NAME := "homelab_server"
 main_path := "homelab.com/homelab-server/homeLab-server/cmd"
+migration_sql_path := "homelab.com/homelab-server/database/migration"
 
 build_args := "-v"
 
@@ -15,7 +16,8 @@ run: build
     ./{{APP_NAME}}
 
 migrate:
-    @echo "Not implemented yet..."
+    @echo "Running migration..."
+    go run {{migration_sql_path}}
 
 # Test the application
 test:
