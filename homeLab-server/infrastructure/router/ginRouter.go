@@ -2,10 +2,11 @@ package router
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"homelab.com/homelab-server/homeLab-server/app/config"
 	"log"
 	"sync"
+
+	"github.com/gin-gonic/gin"
+	"homelab.com/homelab-server/homeLab-server/app/config"
 )
 
 type GinRouter struct {
@@ -20,11 +21,13 @@ var (
 func NewRouter() (Router, error) {
 	r := gin.Default()
 
-	once.Do(func() {
-		routerInstance = &GinRouter{
-			Router: r,
-		}
-	})
+	once.Do(
+		func() {
+			routerInstance = &GinRouter{
+				Router: r,
+			}
+		},
+	)
 	return routerInstance, nil
 }
 

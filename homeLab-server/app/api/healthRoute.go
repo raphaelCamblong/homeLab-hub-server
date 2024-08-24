@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
-	"net/http"
 )
 
 func HealthRoute(infra *infrastructure.Infrastructure) error {

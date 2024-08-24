@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"homelab.com/homelab-server/homeLab-server/internal/usecase"
-	"net/http"
 )
 
 type StatusHandler struct {

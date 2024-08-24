@@ -1,12 +1,13 @@
 package app
 
 import (
+	"log"
+
 	"homelab.com/homelab-server/homeLab-server/app/api"
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/cache"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/router"
-	"log"
 )
 
 type App struct {

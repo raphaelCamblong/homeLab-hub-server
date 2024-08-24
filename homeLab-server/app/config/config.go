@@ -36,29 +36,31 @@ var (
 )
 
 func GetConfig() *Configuration {
-	once.Do(func() {
-		env := LoadDotEnv()
-		serverPort, err := strconv.Atoi(env.AppPort)
-		cacheDbPort, err := strconv.Atoi(env.RedisPort)
-		if err != nil {
-			log.Fatal("Error parsing env port")
-		}
-		configInstance = &Configuration{
-			Server: &Server{
-				Host: env.AppHost,
-				Port: serverPort,
-			},
-			Db: &Db{
-				Host: "./database/local.db",
-				Port: 0,
-			},
-			CacheDb: &CacheDb{
-				Host:     env.RedisHost,
-				Port:     cacheDbPort,
-				Password: env.RedisPassword,
-				Channel:  0,
-			},
-		}
-	})
+	once.Do(
+		func() {
+			env := LoadDotEnv()
+			serverPort, err := strconv.Atoi(env.AppPort)
+			cacheDbPort, err := strconv.Atoi(env.RedisPort)
+			if err != nil {
+				log.Fatal("Error parsing env port")
+			}
+			configInstance = &Configuration{
+				Server: &Server{
+					Host: env.AppHost,
+					Port: serverPort,
+				},
+				Db: &Db{
+					Host: "./database/local.db",
+					Port: 0,
+				},
+				CacheDb: &CacheDb{
+					Host:     env.RedisHost,
+					Port:     cacheDbPort,
+					Password: env.RedisPassword,
+					Channel:  0,
+				},
+			}
+		},
+	)
 	return configInstance
 }

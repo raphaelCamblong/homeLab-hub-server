@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/migration"
-	"log"
 )
 
 func main() {

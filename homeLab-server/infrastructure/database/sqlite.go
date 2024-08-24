@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
+	"log"
+	"sync"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"homelab.com/homelab-server/homeLab-server/app/config"
-	"log"
-	"sync"
 )
 
 type sqliteDatabase struct {
@@ -20,16 +21,18 @@ var (
 
 func NewSqliteDatabase() (Database, error) {
 	c := config.GetConfig()
-	once.Do(func() {
-		dsn := fmt.Sprintf("file:%s?cache=shared&mode=rwc", c.Db.Host)
+	once.Do(
+		func() {
+			dsn := fmt.Sprintf("file:%s?cache=shared&mode=rwc", c.Db.Host)
 
-		db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
-		dbInstance = &sqliteDatabase{Db: db}
-		log.Default().Print("Successfully connected to database: %s", dsn)
-	})
+			db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+			if err != nil {
+				log.Fatal("failed to connect database")
+			}
+			dbInstance = &sqliteDatabase{Db: db}
+			log.Default().Print("Successfully connected to database: %s", dsn)
+		},
+	)
 	return dbInstance, nil
 }
 
