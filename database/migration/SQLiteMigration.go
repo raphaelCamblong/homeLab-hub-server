@@ -9,5 +9,5 @@ import (
 func main() {
 	db, _ := database.NewSqliteDatabase()
 	migration.StatusMigration(db)
-	log.Print("Successfully Run
+	log.Print("Successfully Run the migration!")
 }
