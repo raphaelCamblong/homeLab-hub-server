@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"homelab.com/homelab-server/homeLab-server/config"
+	"homelab.com/homelab-server/homeLab-server/app/config"
+	"log"
 	"sync"
 )
 
@@ -27,12 +28,12 @@ func NewRedisDatabase() (Database, error) {
 			DB:       c.CacheDb.Channel,
 		})
 
-		pong, err := client.Ping(context.Background()).Result()
+		_, err := client.Ping(context.Background()).Result()
 		if err != nil {
-			panic(fmt.Errorf("failed to connect to Redis: %w", err)) // Change to proper error handling in production
+			log.Fatal(fmt.Errorf("failed to connect to Redis: %w", err)) // Change to proper error handling in production
 		}
 
-		fmt.Println("Successfully connected to Redis:", pong)
+		log.Print("Successfully connected to Redis")
 		redisClient = &redisDatabase{client: client}
 	})
 

@@ -13,7 +13,3 @@ type Application struct {
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
 }
-
-func NewApplication(name string, description string, tags []string, logoPath string, state bool) *Application {
-	return &Application{Name: name, Description: description, Tags: tags, LogoPath: logoPath, State: state}
-}

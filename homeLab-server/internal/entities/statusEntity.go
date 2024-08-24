@@ -1,6 +1,11 @@
 package entities
 
+import (
+	"gorm.io/gorm"
+)
+
 type StatusEntity struct {
-	version string
+	gorm.Model
+	Version string
 	Health  string
 }
