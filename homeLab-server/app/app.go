@@ -1,12 +1,12 @@
 package app
 
 import (
-	"log"
-
 	"homelab.com/homelab-server/homeLab-server/app/api"
+	"homelab.com/homelab-server/homeLab-server/app/config"
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/cache"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/externalHttpService"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/router"
 )
 
@@ -27,7 +27,7 @@ func NewApp() *App {
 			Router:              initRouter(),
 			Cache:               initRedis(),
 			Db:                  initSQLite(),
-			ExternalHttpService: nil,
+			ExternalHttpService: initExternalHttpService(),
 		},
 	}
 }
@@ -35,7 +35,7 @@ func NewApp() *App {
 func initRedis() cache.Database {
 	redisDb, err := cache.NewRedisDatabase()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	defer func() { _ = redisDb.GetClient().Close() }()
 	return redisDb
@@ -44,7 +44,7 @@ func initRedis() cache.Database {
 func initSQLite() database.Database {
 	db, err := database.NewSqliteDatabase()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return db
 }
@@ -52,8 +52,14 @@ func initSQLite() database.Database {
 func initRouter() router.Router {
 	rtr, err := router.NewRouter()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return rtr
+}
+
+func initExternalHttpService() externalHttpService.ExternalHttpService {
+	cfg := config.GetConfig()
+	redfish := externalHttpService.NewRedfishInfra(cfg.ExternalServicesCredential.IloIp)
+	return externalHttpService.NewExternalHttpService(redfish, nil)
 }
