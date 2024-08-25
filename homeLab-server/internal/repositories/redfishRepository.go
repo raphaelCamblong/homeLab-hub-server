@@ -14,7 +14,7 @@ import (
 type RedfishRepository interface {
 	UseSession() error
 	GetThermalData() (*entities.ThermalEntity, error)
-	GetPowerData() (*entities.ThermalEntity, error)
+	GetPowerData() (*entities.PowerEntity, error)
 }
 
 type redfishRepository struct {
@@ -102,11 +102,13 @@ func (r *redfishRepository) GetThermalData() (*entities.ThermalEntity, error) {
 	return &thermalData, err
 }
 
-func (r *redfishRepository) GetPowerData() (*entities.ThermalEntity, error) {
-	_, err := r.Service.GetPowerData(r.ReqOpt)
+func (r *redfishRepository) GetPowerData() (*entities.PowerEntity, error) {
+	bodyByte, err := r.Service.GetPowerData(r.ReqOpt)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to to retrieve power data: %w", err)
 	}
 
-	return nil, err
+	var powerData entities.PowerEntity
+	powerData, err = entities.UnmarshalPowerEntity(*bodyByte)
+	return &powerData, err
 }
