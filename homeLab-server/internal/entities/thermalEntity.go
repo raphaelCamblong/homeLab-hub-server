@@ -2,17 +2,17 @@ package entities
 
 import "encoding/json"
 
-func UnmarshalThermal(data []byte) (Thermal, error) {
-	var r Thermal
+func UnmarshalThermalEntity(data []byte) (ThermalEntity, error) {
+	var r ThermalEntity
 	err := json.Unmarshal(data, &r)
 	return r, err
 }
 
-func (r *Thermal) Thermal() ([]byte, error) {
+func (r *ThermalEntity) ThermalEntity() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-type Thermal struct {
+type ThermalEntity struct {
 	OdataContext string        `json:"@odata.context"`
 	OdataID      string        `json:"@odata.id"`
 	OdataType    string        `json:"@odata.type"`
