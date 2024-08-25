@@ -10,7 +10,7 @@ import (
 func ThermalRoutes(infra *infrastructure.Infrastructure) error {
 	router := infra.Router.Get()
 
-	redfishRepo := repositories.NewRedfishRepository(infra.Cache)
+	redfishRepo := repositories.NewRedfishRepository(infra.Cache, infra.ExternalHttpService.GetRedfish())
 	thermalRepo := repositories.NewThermalRepository(redfishRepo)
 
 	thermalHandler := handlers.NewThermalHandler(usecase.NewThermalUseCase(thermalRepo))
