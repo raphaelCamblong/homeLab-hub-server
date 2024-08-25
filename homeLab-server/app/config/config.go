@@ -8,9 +8,10 @@ import (
 
 type (
 	Configuration struct {
-		Server  *Server
-		Db      *Db
-		CacheDb *CacheDb
+		Server                     *Server
+		Db                         *Db
+		CacheDb                    *CacheDb
+		ExternalServicesCredential *ExternalServicesCredential
 	}
 	Server struct {
 		Host string
@@ -27,6 +28,12 @@ type (
 		Port     int
 		Password string
 		Channel  int
+	}
+
+	ExternalServicesCredential struct {
+		IloIp       string
+		IloUsername string
+		IloPassword string
 	}
 )
 
@@ -58,6 +65,11 @@ func GetConfig() *Configuration {
 					Port:     cacheDbPort,
 					Password: env.RedisPassword,
 					Channel:  0,
+				},
+				ExternalServicesCredential: &ExternalServicesCredential{
+					IloIp:       env.IloIp,
+					IloUsername: env.IloUsername,
+					IloPassword: env.IloKey,
 				},
 			}
 		},

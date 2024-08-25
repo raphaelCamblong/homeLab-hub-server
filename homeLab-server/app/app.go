@@ -17,6 +17,7 @@ type App struct {
 func (app *App) Start() {
 	_ = api.StatusRoutes(app.Infra)
 	_ = api.HealthRoute(app.Infra)
+	_ = api.ThermalRoutes(app.Infra)
 	app.Infra.Router.Start()
 }
 
@@ -24,7 +25,7 @@ func NewApp() *App {
 	return &App{
 		Infra: &infrastructure.Infrastructure{
 			Router:              initRouter(),
-			Cache:               nil, //initRedis()
+			Cache:               initRedis(),
 			Db:                  initSQLite(),
 			ExternalHttpService: nil,
 		},
