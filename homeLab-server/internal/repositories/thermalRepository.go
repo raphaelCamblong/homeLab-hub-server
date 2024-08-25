@@ -18,10 +18,8 @@ func NewThermalRepository(redfishRepository RedfishRepository) ThermalRepository
 }
 
 func (r *thermalRepository) GetThermal(_ *gin.Context) (*entities.ThermalEntity, error) {
-	if !r.redfishRepository.IsSessionOpen() {
-		if err := r.redfishRepository.CreateSession(); err != nil {
-			return nil, err
-		}
+	if err := r.redfishRepository.UseSession(); err != nil {
+		return nil, err
 	}
 	return r.redfishRepository.GetThermalData()
 }
