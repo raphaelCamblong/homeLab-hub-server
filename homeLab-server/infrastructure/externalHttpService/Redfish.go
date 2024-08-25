@@ -11,6 +11,7 @@ import (
 type Redfish interface {
 	CreateSession(credentials *Credentials) (*RequestOption, error)
 	GetThermalData(request *RequestOption) (*[]byte, error)
+	GetPowerFastData(request *RequestOption) (*[]byte, error)
 	GetPowerData(request *RequestOption) (*[]byte, error)
 }
 
@@ -60,8 +61,8 @@ func (r *redfish) CreateSession(cred *Credentials) (*RequestOption, error) {
 	return &RequestOption{token}, nil
 }
 
-func (r *redfish) GetThermalData(requestCtx *RequestOption) (*[]byte, error) {
-	thermalURL := fmt.Sprintf("%s/Chassis/1/Thermal", r.BaseUrl)
+func (r *redfish) getData(path string, requestCtx *RequestOption) (*[]byte, error) {
+	thermalURL := fmt.Sprintf("%s/%s", r.BaseUrl, path)
 	req, err := http.NewRequest(http.MethodGet, thermalURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -85,27 +86,26 @@ func (r *redfish) GetThermalData(requestCtx *RequestOption) (*[]byte, error) {
 	return &bodyBytes, nil
 }
 
-func (r *redfish) GetPowerData(requestCtx *RequestOption) (*[]byte, error) {
-	thermalURL := fmt.Sprintf("%s/Chassis/1/Power", r.BaseUrl)
-	req, err := http.NewRequest(http.MethodGet, thermalURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("X-Auth-Token", requestCtx.AuthToken)
-	resp, err := http.DefaultClient.Do(req)
+func (r *redfish) GetThermalData(requestCtx *RequestOption) (*[]byte, error) {
+	res, err := r.getData("Chassis/1/Thermal", requestCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve thermal data: %w", err)
 	}
-	defer resp.Body.Close()
+	return res, nil
+}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to retrieve thermal data: status code %d", resp.StatusCode)
-	}
-
-	bodyBytes, err := io.ReadAll(resp.Body)
+func (r *redfish) GetPowerData(requestCtx *RequestOption) (*[]byte, error) {
+	res, err := r.getData("Chassis/1/Power/PowerMeter", requestCtx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, fmt.Errorf("failed to retrieve power data: %w", err)
 	}
+	return res, nil
+}
 
-	return &bodyBytes, nil
+func (r *redfish) GetPowerFastData(requestCtx *RequestOption) (*[]byte, error) {
+	res, err := r.getData("Chassis/1/Power/FastPowerMeter", requestCtx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve power fast data: %w", err)
+	}
+	return res, nil
 }
