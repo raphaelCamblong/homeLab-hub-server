@@ -24,7 +24,11 @@ func (h *AuthenticationHandler) Register(c *gin.Context) {
 
 	token, err := h.authenticationUseCase.Register(credentials)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		if err.Error() == "username already exists" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
