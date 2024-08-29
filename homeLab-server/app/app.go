@@ -35,6 +35,7 @@ func (app *App) Start() {
 
 	logrus.Info("Binding api routes")
 	_ = api.HealthRoute(app.Infra, app.Repositories)
+	_ = api.AuthRoutes(app.Infra, app.Repositories)
 	_ = api.IloRoutes(app.Infra, app.Repositories)
 	_ = api.CloudRoutes(app.Infra, app.Repositories)
 
