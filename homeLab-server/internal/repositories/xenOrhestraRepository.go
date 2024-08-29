@@ -48,13 +48,12 @@ func (x *xenOrchestraRepository) GetAllVm() (*entities.XoRawPathEntity, error) {
 		return nil, fmt.Errorf("failed to to retrieve Vms data: %w", err)
 	}
 
-	var xoPath entities.XoRawPathEntity
-	xoPath, err = entities.UnmarshalXoRawPathEntity(*bodyBytes)
+	xoPath, err := entities.UnmarshalXoRawPathEntity(*bodyBytes)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to to unmarshal Vms data: %w", err)
 	}
-	return &xoPath, err
+	return xoPath, err
 }
 
 func (x *xenOrchestraRepository) GetVm(id string) (*entities.VMEntity, error) {
@@ -63,13 +62,12 @@ func (x *xenOrchestraRepository) GetVm(id string) (*entities.VMEntity, error) {
 		return nil, fmt.Errorf("failed to to retrieve Vm: '%s' data: %w", id, err)
 	}
 
-	var vm entities.VMEntity
-	vm, err = entities.UnmarshalVMEntity(*bodyBytes)
+	vm, err := entities.UnmarshalVMEntity(*bodyBytes)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to to unmarshal Host data: %w", err)
 	}
-	return &vm, err
+	return vm, err
 }
 
 func (x *xenOrchestraRepository) GetAllHost() (*entities.XoRawPathEntity, error) {
@@ -78,10 +76,10 @@ func (x *xenOrchestraRepository) GetAllHost() (*entities.XoRawPathEntity, error)
 		return nil, fmt.Errorf("failed to to retrieve Hosts data: %w", err)
 	}
 
-	var xoPath entities.XoRawPathEntity
+	var xoPath *entities.XoRawPathEntity
 	xoPath, err = entities.UnmarshalXoRawPathEntity(*bodyBytes)
 
-	return &xoPath, err
+	return xoPath, err
 }
 
 func (x *xenOrchestraRepository) GetHost(id string) (*entities.HostEntity, error) {
@@ -90,8 +88,8 @@ func (x *xenOrchestraRepository) GetHost(id string) (*entities.HostEntity, error
 		return nil, fmt.Errorf("failed to to retrieve host: '%s' data: %w", id, err)
 	}
 
-	var host entities.HostEntity
+	var host *entities.HostEntity
 	host, err = entities.UnmarshalHostEntity(*bodyBytes)
 
-	return &host, err
+	return host, err
 }

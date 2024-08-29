@@ -31,7 +31,7 @@ func NewRedfishRepository(cache cache.Database, redfish externalHttpService.Redf
 }
 
 func (r *redfishRepository) UseSession() error {
-	// Try get token from the heap
+	// Try to get token from the heap
 	if r.ReqOpt != nil {
 		return nil
 	}
@@ -93,22 +93,20 @@ func (r *redfishRepository) saveTokenCache(option externalHttpService.RequestOpt
 func (r *redfishRepository) GetThermalData() (*entities.ThermalEntity, error) {
 	bodyBytes, err := r.Service.GetThermalData(r.ReqOpt)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to to retrieve thermal data: %w", err)
+		return nil, fmt.Errorf("failed to to retrieve thermal data: %w", err)
 	}
 
-	var thermalData entities.ThermalEntity
-	thermalData, err = entities.UnmarshalThermalEntity(*bodyBytes)
+	thermalData, err := entities.UnmarshalThermalEntity(*bodyBytes)
 
-	return &thermalData, err
+	return thermalData, err
 }
 
 func (r *redfishRepository) GetPowerData() (*entities.PowerEntity, error) {
 	bodyByte, err := r.Service.GetPowerData(r.ReqOpt)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to to retrieve power data: %w", err)
+		return nil, fmt.Errorf("failed to to retrieve power data: %w", err)
 	}
 
-	var powerData entities.PowerEntity
-	powerData, err = entities.UnmarshalPowerEntity(*bodyByte)
-	return &powerData, err
+	powerData, err := entities.UnmarshalPowerEntity(*bodyByte)
+	return powerData, err
 }
