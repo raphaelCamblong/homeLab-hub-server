@@ -21,9 +21,9 @@ type (
 func NewApp() *App {
 	return &App{
 		Infra: &infrastructure.Infrastructure{
-			Router:              initRouter(),
-			Cache:               initRedis(),
-			Db:                  initSQLite(),
+			Router:              *initRouter(),
+			Cache:               *initRedis(),
+			Db:                  *initSQLite(),
 			ExternalHttpService: initExternalHttpService(),
 		},
 	}
@@ -42,31 +42,29 @@ func (app *App) Start() {
 	app.Infra.Router.Start()
 }
 
-func initRedis() cache.Database {
+func initRedis() *cache.Database {
 	redisDb, err := cache.NewRedisDatabase()
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = redisDb.GetClient().Close() }()
-	return redisDb
+	return &redisDb
 }
 
-func initSQLite() database.Database {
+func initSQLite() *database.Database {
 	db, err := database.NewSqliteDatabase()
 	if err != nil {
 		panic(err)
 	}
-	return db
+	return &db
 }
 
-func initRouter() router.Router {
+func initRouter() *router.Router {
 	rtr, err := router.NewRouter()
 
 	if err != nil {
 		panic(err)
 	}
-
-	return rtr
+	return &rtr
 }
 
 func initExternalHttpService() externalHttpService.ExternalHttpService {
