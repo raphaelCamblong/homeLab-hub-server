@@ -4,10 +4,10 @@ import "time"
 
 import "encoding/json"
 
-func UnmarshalVMEntity(data []byte) (VMEntity, error) {
+func UnmarshalVMEntity(data []byte) (*VMEntity, error) {
 	var r VMEntity
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 func (r *VMEntity) Marshal() ([]byte, error) {

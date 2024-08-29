@@ -2,10 +2,10 @@ package entities
 
 import "encoding/json"
 
-func UnmarshalThermalEntity(data []byte) (ThermalEntity, error) {
+func UnmarshalThermalEntity(data []byte) (*ThermalEntity, error) {
 	var r ThermalEntity
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 func (r *ThermalEntity) ThermalEntity() ([]byte, error) {

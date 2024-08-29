@@ -4,10 +4,10 @@ import "time"
 
 import "encoding/json"
 
-func UnmarshalPowerEntity(data []byte) (PowerEntity, error) {
+func UnmarshalPowerEntity(data []byte) (*PowerEntity, error) {
 	var r PowerEntity
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 func (r *PowerEntity) Marshal() ([]byte, error) {
