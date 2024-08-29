@@ -19,8 +19,7 @@ func NewRepositories(infra *infrastructure.Infrastructure) *Repositories {
 		Status:       repositories.NewStatusRepository(infra.Db),
 		Redfish:      repositories.NewRedfishRepository(infra.Cache, infra.ExternalHttpService.GetRedfish()),
 	}
-	repo.Ilo = repositories.NewThermalRepository(repo.Redfish)
+	repo.Ilo = repositories.NewThermalRepository(repo.Redfish, infra.Cache)
 	repo.Cloud = repositories.NewCloudRepository(repo.XenOrchestra)
-
 	return &repo
 }
