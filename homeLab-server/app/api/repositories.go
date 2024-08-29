@@ -11,6 +11,7 @@ type Repositories struct {
 	Ilo          repositories.ILORepository
 	Redfish      repositories.RedfishRepository
 	Cloud        repositories.CloudRepository
+	Auth         repositories.AuthenticationRepository
 }
 
 func NewRepositories(infra *infrastructure.Infrastructure) *Repositories {
@@ -18,6 +19,7 @@ func NewRepositories(infra *infrastructure.Infrastructure) *Repositories {
 		XenOrchestra: repositories.NewXenOrchestraRepository(infra.Cache, infra.ExternalHttpService.GetXenOrchestra(), infra.Db),
 		Status:       repositories.NewStatusRepository(infra.Db),
 		Redfish:      repositories.NewRedfishRepository(infra.Cache, infra.ExternalHttpService.GetRedfish()),
+		Auth:         repositories.NewAuthenticationRepository(infra.Db),
 	}
 	repo.Ilo = repositories.NewThermalRepository(repo.Redfish, infra.Cache)
 	repo.Cloud = repositories.NewCloudRepository(repo.XenOrchestra)
