@@ -1,17 +1,19 @@
 package api
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
+	"homelab.com/homelab-server/homeLab-server/internal/handlers"
+	"homelab.com/homelab-server/homeLab-server/internal/usecase"
 )
 
-func HealthRoute(infra *infrastructure.Infrastructure) error {
-	r := infra.Router.Get()
+func HealthRoute(infra *infrastructure.Infrastructure, repo *Repositories) error {
+	r := infra.Router.Get().Group("/api/v1")
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Server Ok"})
-	})
+	statusHandler := handlers.NewHealthHandler(usecase.NewStatusUseCase(repo.Status))
+
+	infra.Router.Get().GET("/status", statusHandler.GetOK)
+	r.GET("/status", statusHandler.GetStatus)
+	r.GET("/health", statusHandler.GetOK)
+
 	return nil
 }

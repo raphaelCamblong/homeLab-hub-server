@@ -1,8 +1,7 @@
 package main
 
 import (
-	"log"
-
+	"github.com/sirupsen/logrus"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/migration"
 )
@@ -10,5 +9,5 @@ import (
 func main() {
 	db, _ := database.NewSqliteDatabase()
 	migration.StatusMigration(db)
-	log.Print("Successfully Run the migration!")
+	logrus.Info("Successfully Run the migration!")
 }

@@ -3,7 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
@@ -34,15 +34,12 @@ func NewRedisDatabase() (Database, error) {
 
 			_, err := client.Ping(context.Background()).Result()
 			if err != nil {
-				log.Fatal(
-					fmt.Errorf(
-						"failed to connect to Redis: %w",
-						err,
-					),
-				) // Change to proper error handling in production
+				logrus.Errorf("failed to connect to Redis: %w",
+					err)
+				panic(err)
 			}
 
-			log.Print("Successfully connected to Redis")
+			logrus.Info("Successfully connected to Redis")
 			redisClient = &redisDatabase{client: client}
 		},
 	)

@@ -2,15 +2,15 @@ package externalHttpService
 
 type ExternalHttpService interface {
 	GetRedfish() Redfish
-	GetXenOrchestra() any
+	GetXenOrchestra() XenOrchestra
 }
 
 type externalHttpService struct {
 	redfish Redfish
-	xo      any
+	xo      XenOrchestra
 }
 
-func NewExternalHttpService(redfish Redfish, xen any) ExternalHttpService {
+func NewExternalHttpService(redfish Redfish, xen XenOrchestra) ExternalHttpService {
 	return &externalHttpService{redfish, xen}
 }
 
@@ -18,6 +18,15 @@ func (e *externalHttpService) GetRedfish() Redfish {
 	return e.redfish
 }
 
-func (e *externalHttpService) GetXenOrchestra() any {
+func (e *externalHttpService) GetXenOrchestra() XenOrchestra {
 	return e.xo
 }
+
+type (
+	RequestOption struct {
+		AuthToken string `json:"AuthToken"`
+	}
+	AuthToken struct {
+		AuthToken string `json:"authenticationToken"`
+	}
+)

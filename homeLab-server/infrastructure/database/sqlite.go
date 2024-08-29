@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
 	"sync"
 
 	"gorm.io/driver/sqlite"
@@ -27,10 +27,10 @@ func NewSqliteDatabase() (Database, error) {
 
 			db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 			if err != nil {
-				log.Fatal("failed to connect database")
+				logrus.Errorf("failed to connect database: %d", err)
 			}
 			dbInstance = &sqliteDatabase{Db: db}
-			log.Default().Print("Successfully connected to database: %s", dsn)
+			logrus.Infof("Successfully connected to database: %s", dsn)
 		},
 	)
 	return dbInstance, nil

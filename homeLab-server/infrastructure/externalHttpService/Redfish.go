@@ -15,10 +15,6 @@ type Redfish interface {
 	GetPowerData(request *RequestOption) (*[]byte, error)
 }
 
-type RequestOption struct {
-	AuthToken string `json:"AuthToken"`
-}
-
 type Credentials struct {
 	Username string `json:"UserName"`
 	Password string `json:"Password"`
