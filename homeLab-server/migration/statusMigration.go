@@ -1,8 +1,7 @@
 package migration
 
 import (
-	"log"
-
+	"github.com/sirupsen/logrus"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/internal/entities"
 )
@@ -10,7 +9,7 @@ import (
 func StatusMigration(db database.Database) {
 	err := db.GetDb().AutoMigrate(&entities.StatusEntity{})
 	if err != nil {
-		log.Fatal(err)
+		logrus.Error(err)
 	}
 	db.GetDb().CreateInBatches(
 		[]*entities.StatusEntity{
