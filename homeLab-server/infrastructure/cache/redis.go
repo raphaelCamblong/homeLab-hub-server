@@ -11,7 +11,7 @@ import (
 )
 
 type redisDatabase struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
 var (
@@ -40,7 +40,7 @@ func NewRedisDatabase() (Database, error) {
 			}
 
 			logrus.Info("Successfully connected to Redis")
-			redisClient = &redisDatabase{client: client}
+			redisClient = &redisDatabase{Client: client}
 		},
 	)
 
@@ -48,5 +48,5 @@ func NewRedisDatabase() (Database, error) {
 }
 
 func (r *redisDatabase) GetClient() *redis.Client {
-	return r.client
+	return r.Client
 }

@@ -2,10 +2,10 @@ package entities
 
 import "encoding/json"
 
-func UnmarshalHostEntity(data []byte) (HostEntity, error) {
+func UnmarshalHostEntity(data []byte) (*HostEntity, error) {
 	var r HostEntity
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 func (r *HostEntity) Marshal() ([]byte, error) {

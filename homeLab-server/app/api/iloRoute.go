@@ -12,5 +12,6 @@ func IloRoutes(infra *infrastructure.Infrastructure, repo *Repositories) error {
 	thermalHandler := handlers.NewIloHandler(usecase.NewRewIloUseCase(repo.Ilo))
 
 	router.Group("").GET("/thermal", thermalHandler.GetThermal)
+	router.Group("").GET("/power", thermalHandler.GetPower)
 	return nil
 }

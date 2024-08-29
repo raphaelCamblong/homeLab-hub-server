@@ -4,10 +4,10 @@ import "encoding/json"
 
 type XoRawPathEntity []string
 
-func UnmarshalXoRawPathEntity(data []byte) (XoRawPathEntity, error) {
+func UnmarshalXoRawPathEntity(data []byte) (*XoRawPathEntity, error) {
 	var r XoRawPathEntity
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 func (r *XoRawPathEntity) Marshal() ([]byte, error) {

@@ -24,3 +24,13 @@ func (h *IloHandler) GetThermal(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, thermal)
 }
+
+func (h *IloHandler) GetPower(ctx *gin.Context) {
+	data, err := h.thermalUseCase.GetPower()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, data)
+}
