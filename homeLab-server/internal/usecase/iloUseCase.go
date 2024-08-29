@@ -7,6 +7,7 @@ import (
 
 type IlohUseCase interface {
 	GetThermal() (*entities.ThermalEntity, error)
+	GetPower() (*entities.PowerEntity, error)
 }
 
 type iloUseCase struct {
@@ -19,4 +20,8 @@ func NewRewIloUseCase(iloRepository repositories.ILORepository) IlohUseCase {
 
 func (u *iloUseCase) GetThermal() (*entities.ThermalEntity, error) {
 	return u.iloRepository.GetThermal()
+}
+
+func (u *iloUseCase) GetPower() (*entities.PowerEntity, error) {
+	return u.iloRepository.GetPower()
 }
