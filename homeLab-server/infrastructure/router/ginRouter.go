@@ -2,7 +2,7 @@ package router
 
 import (
 	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,7 @@ var (
 
 func NewRouter() (Router, error) {
 	r := gin.Default()
-
+	_ = r.SetTrustedProxies([]string{"192.168.1.0/24", "10.0.0.0/8"})
 	once.Do(
 		func() {
 			routerInstance = &GinRouter{
@@ -37,7 +37,7 @@ func (s *GinRouter) Start() {
 
 	err := s.Router.Run(addr)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Errorf("failed to iniate gin router %d", err)
 	}
 }
 

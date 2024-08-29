@@ -7,7 +7,7 @@ import (
 	"homelab.com/homelab-server/homeLab-server/app/config"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/cache"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/externalHttpService"
-	"homelab.com/homelab-server/homeLab-server/internal/entities"
+	"homelab.com/homelab-server/homeLab-server/internal/entities/ilo"
 	"time"
 )
 

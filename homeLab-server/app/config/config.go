@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"sync"
 )
@@ -34,6 +34,8 @@ type (
 		IloIp       string
 		IloUsername string
 		IloPassword string
+		XoApiKey    string
+		XoApiHost   string
 	}
 )
 
@@ -49,7 +51,7 @@ func GetConfig() *Configuration {
 			serverPort, err := strconv.Atoi(env.AppPort)
 			cacheDbPort, err := strconv.Atoi(env.RedisPort)
 			if err != nil {
-				log.Fatal("Error parsing env port")
+				logrus.Error("Error parsing env port")
 			}
 			configInstance = &Configuration{
 				Server: &Server{
@@ -70,6 +72,8 @@ func GetConfig() *Configuration {
 					IloIp:       env.IloIp,
 					IloUsername: env.IloUsername,
 					IloPassword: env.IloKey,
+					XoApiKey:    env.XoApiKey,
+					XoApiHost:   env.XoApiHost,
 				},
 			}
 		},

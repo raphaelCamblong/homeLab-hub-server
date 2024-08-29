@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/sirupsen/logrus"
 	"homelab.com/homelab-server/homeLab-server/app/api"
 	"homelab.com/homelab-server/homeLab-server/app/config"
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
@@ -10,16 +11,12 @@ import (
 	"homelab.com/homelab-server/homeLab-server/infrastructure/router"
 )
 
-type App struct {
-	Infra *infrastructure.Infrastructure
-}
-
-func (app *App) Start() {
-	_ = api.StatusRoutes(app.Infra)
-	_ = api.HealthRoute(app.Infra)
-	_ = api.ThermalRoutes(app.Infra)
-	app.Infra.Router.Start()
-}
+type (
+	App struct {
+		Infra        *infrastructure.Infrastructure
+		Repositories *api.Repositories
+	}
+)
 
 func NewApp() *App {
 	return &App{
@@ -30,6 +27,19 @@ func NewApp() *App {
 			ExternalHttpService: initExternalHttpService(),
 		},
 	}
+}
+
+func (app *App) Start() {
+	logrus.Info("Loading repositories")
+	app.Repositories = api.NewRepositories(app.Infra)
+
+	logrus.Info("Binding api routes")
+	_ = api.HealthRoute(app.Infra, app.Repositories)
+	_ = api.IloRoutes(app.Infra, app.Repositories)
+	_ = api.CloudRoutes(app.Infra, app.Repositories)
+
+	logrus.Info("Starting router")
+	app.Infra.Router.Start()
 }
 
 func initRedis() cache.Database {
@@ -51,6 +61,7 @@ func initSQLite() database.Database {
 
 func initRouter() router.Router {
 	rtr, err := router.NewRouter()
+
 	if err != nil {
 		panic(err)
 	}
@@ -61,5 +72,6 @@ func initRouter() router.Router {
 func initExternalHttpService() externalHttpService.ExternalHttpService {
 	cfg := config.GetConfig()
 	redfish := externalHttpService.NewRedfishInfra(cfg.ExternalServicesCredential.IloIp)
-	return externalHttpService.NewExternalHttpService(redfish, nil)
+	xo := externalHttpService.NewXenOrchestraInfra(cfg.ExternalServicesCredential.XoApiHost)
+	return externalHttpService.NewExternalHttpService(redfish, xo)
 }
