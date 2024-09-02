@@ -27,10 +27,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/homelab_server:latest .
-
-      - name: Push Docker image
-        run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/homelab_server:latest
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: velocipastor/homelab_server:latest
