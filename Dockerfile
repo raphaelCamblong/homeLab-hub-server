@@ -22,8 +22,6 @@ FROM alpine:latest as final
 WORKDIR /app
 
 EXPOSE 6000
-# TODO: IMPROVE env Injection
-COPY .env .env
 
 # Import database local.db
 COPY --from=builder /app/database/local.db /app/database/local.db
