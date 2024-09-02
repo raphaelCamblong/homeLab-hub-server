@@ -1,0 +1,13 @@
+[
+  {
+    "name": "my-service",
+    "tags": "tags,tags2",
+    "description": "This is a sample service",
+    "namespace": "default",
+    "status": "running",
+    "type": "ClusterIP",
+    "ip": "10.0.0.1",
+    "port": 8080,
+    "logo_url": "https://example.com/my-service-logo.png"
+  }
+]

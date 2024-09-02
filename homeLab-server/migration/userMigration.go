@@ -10,6 +10,7 @@ func UserMigration(db database.Database) {
 	err := db.GetDb().AutoMigrate(&entities.UserEntity{})
 	if err != nil {
 		logrus.Error(err)
+		return
 	}
 	db.GetDb().CreateInBatches(
 		[]*entities.UserEntity{

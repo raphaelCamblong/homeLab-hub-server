@@ -10,6 +10,7 @@ func StatusMigration(db database.Database) {
 	err := db.GetDb().AutoMigrate(&entities.StatusEntity{})
 	if err != nil {
 		logrus.Error(err)
+		return
 	}
 	db.GetDb().CreateInBatches(
 		[]*entities.StatusEntity{

@@ -1,0 +1,8 @@
+replicaCount: 1
+namespace: home-lab
+image:
+  repository: velocipastor/homelab_server
+  tag: latest
+name: home-lab-backend
+service:
+  port: 6000

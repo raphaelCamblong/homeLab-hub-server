@@ -44,3 +44,25 @@ deps:
 tidy:
     @echo "Tidying up the go.mod file..."
     go mod tidy
+
+# Docker
+
+docker_user := "velocipastor"
+# Build the docker image
+docker-build:
+    @echo "Building the docker image..."
+    docker build -t {{APP_NAME}} .
+
+docker-run:
+    @echo "Running the docker image..."
+    docker run -p 6000:6000 {{docker_user}}/{{APP_NAME}}:latest
+
+docker-publish:
+    docker tag {{APP_NAME}}:latest {{docker_user}}/{{APP_NAME}}:latest
+    docker push {{docker_user}}/{{APP_NAME}}:latest
+
+helm-install:
+     cd cicd && helm install home-lab-backend ./homeLab-backend -f ./homeLab-backend/values.yaml -n home-lab
+
+helm-delete:
+     cd cicd && helm delete home-lab-backend -n home-lab
