@@ -22,7 +22,7 @@ func NewApp() *App {
 	return &App{
 		Infra: &infrastructure.Infrastructure{
 			Router:              *initRouter(),
-			Cache:               *initRedis(),
+			Cache:               nil, //*initRedis(),
 			Db:                  *initSQLite(),
 			ExternalHttpService: initExternalHttpService(),
 		},
@@ -38,6 +38,7 @@ func (app *App) Start() {
 	_ = api.AuthRoutes(app.Infra, app.Repositories)
 	_ = api.IloRoutes(app.Infra, app.Repositories)
 	_ = api.CloudRoutes(app.Infra, app.Repositories)
+	_ = api.ServiceRoute(app.Infra, app.Repositories)
 
 	logrus.Info("Starting router")
 	app.Infra.Router.Start()
@@ -46,7 +47,9 @@ func (app *App) Start() {
 func initRedis() *cache.Database {
 	redisDb, err := cache.NewRedisDatabase()
 	if err != nil {
-		panic(err)
+		logrus.Error("Failed to connect to Redis: ", err)
+		//panic(err)
+		return nil
 	}
 	return &redisDb
 }

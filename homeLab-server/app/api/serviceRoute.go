@@ -7,13 +7,14 @@ import (
 	"homelab.com/homelab-server/homeLab-server/internal/usecase"
 )
 
-func IloRoutes(infra *infrastructure.Infrastructure, repo *Repositories) error {
-	router := infra.Router.Get().Group("/api/v1/ilo")
+func ServiceRoute(infra *infrastructure.Infrastructure, repo *Repositories) error {
+	router := infra.Router.Get().Group("/api/v1/service")
 	router.Use(middleware.JWTAuthMiddleware())
 
-	thermalHandler := handlers.NewIloHandler(usecase.NewRewIloUseCase(repo.Ilo))
+	handler := handlers.NewServiceHandler(usecase.NewServiceUseCase(repo.Service))
 
-	router.GET("/thermal", thermalHandler.GetThermal)
-	router.GET("/power", thermalHandler.GetPower)
+	router.GET("/services", handler.GetAllService)
+	router.GET("/service/:id", handler.GetServiceById)
+
 	return nil
 }
