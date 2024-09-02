@@ -29,8 +29,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/homelab_server:latest .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/homelab_server:latest .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/homelab_server:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/homelab_server:latest
