@@ -14,7 +14,7 @@ func ServiceRoute(infra *infrastructure.Infrastructure, repo *Repositories) erro
 	handler := handlers.NewServiceHandler(usecase.NewServiceUseCase(repo.Service))
 
 	router.GET("/services", handler.GetAllService)
-	router.GET("/service", handler.GetServiceById)
+	router.GET("/service/:id", handler.GetServiceById)
 
 	return nil
 }

@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"homelab.com/homelab-server/homeLab-server/internal/usecase"
+	"net/http"
 )
 
 type ServiceHandler struct {
@@ -26,14 +24,19 @@ func (s *ServiceHandler) GetAllService(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, data)
 }
 
+type UserRequest struct {
+	Id string `uri:"id"`
+}
+
 func (s *ServiceHandler) GetServiceById(ctx *gin.Context) {
-	_, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+	var u UserRequest
+
+	if err := ctx.ShouldBindUri(&u); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	data, err := s.serviceUseCase.GetServiceById(ctx.Param("id"))
+	data, err := s.serviceUseCase.GetServiceById(u.Id)
 	if err != nil {
 		if err.Error() == "Service not found" {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
