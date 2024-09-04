@@ -63,6 +63,10 @@ func (r *redfishRepository) UseSession() error {
 func (r *redfishRepository) getCachedToken() (*externalHttpService.RequestOption, error) {
 	ctx := context.Background()
 
+	if r.Cache == nil {
+		return nil, fmt.Errorf("can't get Redfish cached Token")
+	}
+
 	jsonData, err := r.Cache.GetClient().Get(ctx, "redfishToken").Result()
 	if err != nil {
 		return nil, fmt.Errorf("can't get Redfish cached Token")
@@ -72,7 +76,6 @@ func (r *redfishRepository) getCachedToken() (*externalHttpService.RequestOption
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal RequestOption from JSON: %w", err)
 	}
-
 	return &requestOption, nil
 }
 
@@ -82,6 +85,9 @@ func (r *redfishRepository) saveTokenCache(option externalHttpService.RequestOpt
 		return fmt.Errorf("failed to marshal RequestOption: %w", err)
 	}
 
+	if r.Cache == nil {
+		return fmt.Errorf("can't save Redfish Token")
+	}
 	ctx := context.Background()
 	err = r.Cache.GetClient().Set(ctx, "redfishToken", jsonData, time.Minute*30).Err()
 	if err != nil {
