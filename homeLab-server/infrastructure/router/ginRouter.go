@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/router/middleware"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,7 @@ var (
 func NewRouter() (Router, error) {
 	r := gin.Default()
 	_ = r.SetTrustedProxies([]string{"192.168.1.0/24", "10.0.0.0/8"})
+	r.Use(middleware.CORSMiddleware())
 	once.Do(
 		func() {
 			routerInstance = &GinRouter{
@@ -33,7 +35,7 @@ func NewRouter() (Router, error) {
 
 func (s *GinRouter) Start() {
 	c := config.GetConfig()
-	addr := fmt.Sprintf("%s:%d", c.Server.Host, c.Server.Port)
+	addr := fmt.Sprintf(":%d", c.Server.Port)
 
 	err := s.Router.Run(addr)
 	if err != nil {
