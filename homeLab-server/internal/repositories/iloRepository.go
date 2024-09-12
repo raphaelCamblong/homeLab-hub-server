@@ -35,18 +35,20 @@ func (r *iloRepository) GetPower() (*entities.PowerEntity, error) {
 	powerCacheKey := "Ilo_power_data"
 	ctx := context.Background()
 
-	data, err := r.cache.GetClient().Get(ctx, powerCacheKey).Result()
-	if err == nil {
+	if r.cache != nil {
 
-		powerEntity, err := entities.UnmarshalPowerEntity([]byte(data))
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal cached power data: %w", err)
+		data, err := r.cache.GetClient().Get(ctx, powerCacheKey).Result()
+		if err == nil {
+
+			powerEntity, err := entities.UnmarshalPowerEntity([]byte(data))
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal cached power data: %w", err)
+			}
+			return powerEntity, nil
 		}
-		return powerEntity, nil
-	}
-
-	if !errors.Is(err, redis.Nil) {
-		return nil, err
+		if !errors.Is(err, redis.Nil) {
+			return nil, err
+		}
 	}
 
 	if err := r.redfishRepository.UseSession(); err != nil {
@@ -62,7 +64,9 @@ func (r *iloRepository) GetPower() (*entities.PowerEntity, error) {
 		return nil, fmt.Errorf("failed to marshal power data: %w", err)
 	}
 
-	if err := r.cache.GetClient().Set(ctx, powerCacheKey, marshaledData, time.Minute*30).Err(); err != nil {
+	if r.cache == nil {
+		return powerEntity, nil
+	} else if err := r.cache.GetClient().Set(ctx, powerCacheKey, marshaledData, time.Minute*30).Err(); err != nil {
 		return nil, fmt.Errorf("failed to cache power data: %w", err)
 	}
 
