@@ -51,7 +51,7 @@ docker_user := "velocipastor"
 # Build the docker image
 docker-build:
     @echo "Building the docker image..."
-    docker build -t {{APP_NAME}} .
+    docker build -t {{APP_NAME}}:latest .
 
 docker-run:
     @echo "Running the docker image..."
@@ -62,7 +62,7 @@ docker-publish:
     docker push {{docker_user}}/{{APP_NAME}}:latest
 
 helm-install:
-     cd cicd && helm install home-lab-backend ./homeLab-backend -f ./homeLab-backend/values.yaml -n home-lab
+     cd cicd && helm install home-lab-backend ./helm -f ./helm/values.yaml -n home-lab
 
 helm-delete:
      cd cicd && helm delete home-lab-backend -n home-lab

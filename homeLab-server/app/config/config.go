@@ -1,41 +1,32 @@
 package config
 
 import (
-	"github.com/sirupsen/logrus"
-	"strconv"
 	"sync"
 )
 
 type (
 	Configuration struct {
-		Server                     *Server
-		Db                         *Db
-		CacheDb                    *CacheDb
+		App                        *AppConfig
+		Db                         *NetworkConnection
+		CacheDb                    *NetworkConnection
 		ExternalServicesCredential *ExternalServicesCredential
 	}
-	Server struct {
-		Host string
-		Port int
+
+	NetworkConnection struct {
+		Host    string
+		User    *string
+		Key     *string
+		Channel *int
 	}
 
-	Db struct {
-		Host string
-		Port int
-	}
-
-	CacheDb struct {
-		Host     string
-		Port     int
-		Password string
-		Channel  int
+	Security struct {
+		JwtSecret     string
+		JetExpiration int
 	}
 
 	ExternalServicesCredential struct {
-		IloIp       string
-		IloUsername string
-		IloPassword string
-		XoApiKey    string
-		XoApiHost   string
+		Ilo NetworkConnection
+		XO  NetworkConnection
 	}
 )
 
@@ -47,33 +38,30 @@ var (
 func GetConfig() *Configuration {
 	once.Do(
 		func() {
-			env := LoadDotEnv()
-			serverPort, err := strconv.Atoi(env.AppPort)
-			cacheDbPort, err := strconv.Atoi(env.RedisPort)
-			if err != nil {
-				logrus.Error("Error parsing env port")
-			}
+			env := LoadDotEnv(".env")
+			config := LoadYamlConfig("./config.yml")
+
+			helper := int(0)
 			configInstance = &Configuration{
-				Server: &Server{
-					Host: env.AppHost,
-					Port: serverPort,
-				},
-				Db: &Db{
+				App: config,
+				Db: &NetworkConnection{
 					Host: "./database/local.db",
-					Port: 0,
 				},
-				CacheDb: &CacheDb{
-					Host:     env.RedisHost,
-					Port:     cacheDbPort,
-					Password: env.RedisPassword,
-					Channel:  0,
+				CacheDb: &NetworkConnection{
+					Host:    env.RedisHost,
+					Key:     &env.RedisKey,
+					Channel: &helper,
 				},
 				ExternalServicesCredential: &ExternalServicesCredential{
-					IloIp:       env.IloIp,
-					IloUsername: env.IloUsername,
-					IloPassword: env.IloKey,
-					XoApiKey:    env.XoApiKey,
-					XoApiHost:   env.XoApiHost,
+					Ilo: NetworkConnection{
+						Host: env.IloHost,
+						User: &env.IloUsername,
+						Key:  &env.IloKey,
+					},
+					XO: NetworkConnection{
+						Host: env.XoApiHost,
+						Key:  &env.XoApiKey,
+					},
 				},
 			}
 		},

@@ -73,7 +73,7 @@ func initRouter() *router.Router {
 
 func initExternalHttpService() externalHttpService.ExternalHttpService {
 	cfg := config.GetConfig()
-	redfish := externalHttpService.NewRedfishInfra(cfg.ExternalServicesCredential.IloIp)
-	xo := externalHttpService.NewXenOrchestraInfra(cfg.ExternalServicesCredential.XoApiHost)
+	redfish := externalHttpService.NewRedfishInfra(cfg.ExternalServicesCredential.Ilo)
+	xo := externalHttpService.NewXenOrchestraInfra(cfg.ExternalServicesCredential.XO)
 	return externalHttpService.NewExternalHttpService(redfish, xo)
 }
