@@ -1,8 +1,0 @@
-version: "3"
-services:
-    homeLab-backend:
-        image: homelab_server:latest
-        ports:
-        - "8080:6000"
-        env_file:
-          - ../.env

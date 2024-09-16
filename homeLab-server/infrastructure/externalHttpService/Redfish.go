@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"homelab.com/homelab-server/homeLab-server/app/config"
 	"io"
 	"net/http"
 )
@@ -21,15 +22,15 @@ type Credentials struct {
 }
 
 type redfish struct {
-	BaseUrl string
+	cfg config.NetworkConnection
 }
 
-func NewRedfishInfra(baseUrl string) Redfish {
-	return &redfish{baseUrl}
+func NewRedfishInfra(c config.NetworkConnection) Redfish {
+	return &redfish{c}
 }
 
 func (r *redfish) CreateSession(cred *Credentials) (*RequestOption, error) {
-	sessionURL := fmt.Sprintf("%s/Sessions", r.BaseUrl)
+	sessionURL := fmt.Sprintf("%s/Sessions", r.cfg.Host)
 	credJson, err := json.Marshal(cred)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal credentials: %w", err)
@@ -58,7 +59,7 @@ func (r *redfish) CreateSession(cred *Credentials) (*RequestOption, error) {
 }
 
 func (r *redfish) getData(path string, requestCtx *RequestOption) (*[]byte, error) {
-	thermalURL := fmt.Sprintf("%s/%s", r.BaseUrl, path)
+	thermalURL := fmt.Sprintf("%s/%s", r.cfg.Host, path)
 	req, err := http.NewRequest(http.MethodGet, thermalURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)

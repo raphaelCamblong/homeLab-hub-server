@@ -38,7 +38,7 @@ func (x *xenOrchestraRepository) UseSession() {
 	}
 
 	x.ReqOpt = &externalHttpService.RequestOption{
-		AuthToken: config.GetConfig().ExternalServicesCredential.XoApiKey,
+		AuthToken: *config.GetConfig().ExternalServicesCredential.XO.Key,
 	}
 }
 

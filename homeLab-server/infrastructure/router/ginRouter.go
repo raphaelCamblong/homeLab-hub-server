@@ -20,8 +20,9 @@ var (
 )
 
 func NewRouter() (Router, error) {
+	c := config.GetConfig()
 	r := gin.Default()
-	_ = r.SetTrustedProxies([]string{"192.168.1.0/24", "10.0.0.0/8"})
+	_ = r.SetTrustedProxies(c.App.Security.TrustedProxies)
 	r.Use(middleware.CORSMiddleware())
 	once.Do(
 		func() {
@@ -35,7 +36,7 @@ func NewRouter() (Router, error) {
 
 func (s *GinRouter) Start() {
 	c := config.GetConfig()
-	addr := fmt.Sprintf(":%d", c.Server.Port)
+	addr := fmt.Sprintf("%s:%d", c.App.Host, c.App.Port)
 
 	err := s.Router.Run(addr)
 	if err != nil {

@@ -3,15 +3,15 @@ package tools
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
+	"homelab.com/homelab-server/homeLab-server/app/config"
 	entities "homelab.com/homelab-server/homeLab-server/internal/entities/authentication"
 	"time"
 )
 
 func GenerateJWT(username string) (string, error) {
-	//TODO: Change expiration time to a more secure value
-	expirationTime := time.Now().Add(3000 * time.Hour)
-	//TODO: Change secret key to a more secure value
-	secretKey := []byte("secret")
+	cfg := config.GetConfig()
+	expirationTime := time.Now().Add(time.Duration(cfg.App.Security.JWT.Expiration))
+	secretKey := []byte(cfg.App.Security.JWT.Secret)
 
 	claims := &entities.Claims{
 		Username: username,
@@ -26,8 +26,7 @@ func GenerateJWT(username string) (string, error) {
 
 func ParseJWT(tokenStr string) (*entities.Claims, error) {
 	claims := &entities.Claims{}
-	//TODO: Change secret key to a more secure value
-	secretKey := []byte("secret")
+	secretKey := []byte(config.GetConfig().App.Security.JWT.Secret)
 
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil

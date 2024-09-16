@@ -44,8 +44,8 @@ func (r *redfishRepository) UseSession() error {
 	// Try get token from infra
 	cfg := config.GetConfig()
 	cred := externalHttpService.Credentials{
-		Username: cfg.ExternalServicesCredential.IloUsername,
-		Password: cfg.ExternalServicesCredential.IloPassword,
+		Username: *cfg.ExternalServicesCredential.Ilo.User,
+		Password: *cfg.ExternalServicesCredential.Ilo.Key,
 	}
 	opt, err = r.Service.CreateSession(&cred)
 	if err != nil {

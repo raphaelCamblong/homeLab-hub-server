@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"sync"
 
@@ -23,12 +22,11 @@ func NewRedisDatabase() (Database, error) {
 	once.Do(
 		func() {
 			c := config.GetConfig()
-			addr := fmt.Sprintf("%s:%d", c.CacheDb.Host, c.CacheDb.Port)
 			client := redis.NewClient(
 				&redis.Options{
-					Addr:     addr,
-					Password: c.CacheDb.Password,
-					DB:       c.CacheDb.Channel,
+					Addr:     c.CacheDb.Host,
+					Password: *c.CacheDb.Key,
+					DB:       *(c.CacheDb.Channel),
 				},
 			)
 

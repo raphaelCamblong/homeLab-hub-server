@@ -25,6 +25,7 @@ EXPOSE 6000
 
 # Import database local.db
 COPY --from=builder /app/database/local.db /app/database/local.db
+COPY --from=builder /app/config.yml /app
 
 # Create a group and user
 RUN adduser -D myuser

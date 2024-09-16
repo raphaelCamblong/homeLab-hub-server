@@ -2,6 +2,7 @@ package externalHttpService
 
 import (
 	"fmt"
+	"homelab.com/homelab-server/homeLab-server/app/config"
 	"io"
 	"net/http"
 )
@@ -16,12 +17,12 @@ type XenOrchestra interface {
 
 type (
 	xenOrchestra struct {
-		BaseUrl string
+		cfg config.NetworkConnection
 	}
 )
 
-func NewXenOrchestraInfra(baseUrl string) XenOrchestra {
-	return &xenOrchestra{baseUrl}
+func NewXenOrchestraInfra(c config.NetworkConnection) XenOrchestra {
+	return &xenOrchestra{c}
 }
 
 func (x *xenOrchestra) GetAllVm(requestCtx *RequestOption) (*[]byte, error) {
@@ -63,7 +64,7 @@ func (x *xenOrchestra) getData(path string, requestCtx *RequestOption) (*[]byte,
 	if path[0] != '/' {
 		separator = "/"
 	}
-	url := fmt.Sprintf("%s%s%s", x.BaseUrl, separator, path)
+	url := fmt.Sprintf("%s%s%s", x.cfg.Host, separator, path)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {

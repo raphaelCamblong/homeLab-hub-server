@@ -1,41 +1,43 @@
 package config
 
 import (
+	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type DotEnvConfig struct {
-	IloIp         string
-	IloUsername   string
-	IloKey        string
-	RedisPassword string
-	RedisHost     string
-	RedisPort     string
-	AppHost       string
-	AppPort       string
-	XoApiKey      string
-	XoApiHost     string
+	IloHost     string `mapstructure:"ILO_HOST"`
+	IloUsername string `mapstructure:"ILO_USERNAME"`
+	IloKey      string `mapstructure:"ILO_KEY"`
+	XoApiHost   string `mapstructure:"XO_API_HOST"`
+	XoApiKey    string `mapstructure:"XO_API_KEY"`
+	RedisHost   string `mapstructure:"REDIS_HOST"`
+	RedisKey    string `mapstructure:"REDIS_KEY"`
 }
 
-func LoadDotEnv() *DotEnvConfig {
-	path := ".env"
-	err := godotenv.Load(path)
+func LoadDotEnv(path string) *DotEnvConfig {
+	var config DotEnvConfig
+	var result map[string]interface{}
+	viper.SetConfigFile(path)
+
+	if err := viper.ReadInConfig(); err != nil {
+		logrus.Errorf("Error reading config file, %s", err)
+		os.Exit(1)
+	}
+	err := viper.Unmarshal(&result)
 	if err != nil {
-		logrus.Errorf("Error loading .env file: %s", err)
+		logrus.Errorf("Unable to decode into map, %v", err)
+		os.Exit(1)
 	}
-	return &DotEnvConfig{
-		IloIp:         os.Getenv("ILO_IP"),
-		IloUsername:   os.Getenv("ILO_USERNAME"),
-		IloKey:        os.Getenv("ILO_KEY"),
-		RedisPassword: os.Getenv("REDIS_PASSWORD"),
-		RedisHost:     os.Getenv("REDIS_HOST"),
-		RedisPort:     os.Getenv("REDIS_PORT"),
-		AppHost:       os.Getenv("APP_HOST"),
-		AppPort:       os.Getenv("APP_PORT"),
-		XoApiKey:      os.Getenv("XO_API_KEY"),
-		XoApiHost:     os.Getenv("XO_API_HOST"),
+
+	decErr := mapstructure.Decode(result, &config)
+
+	if decErr != nil {
+		logrus.Errorf("error decoding")
+		os.Exit(1)
 	}
+
+	return &config
 }
