@@ -8,4 +8,4 @@ security:
     - "10.0.0.0/8"
   jwt:
     secret: fo3i0984rfiubsh98e23eydgysvwyg3rgdsugd
-    expiration: 86400
+    expiration: 3600
