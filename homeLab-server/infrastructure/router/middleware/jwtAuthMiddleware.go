@@ -19,7 +19,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		tokenStr := strings.Split(authHeader, "Bearer ")[1]
 		claims, err := tools.ParseJWT(tokenStr)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()
 			return
 		}
