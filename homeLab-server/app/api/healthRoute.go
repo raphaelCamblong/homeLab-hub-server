@@ -11,7 +11,6 @@ func HealthRoute(infra *infrastructure.Infrastructure, repo *Repositories) error
 
 	statusHandler := handlers.NewHealthHandler(usecase.NewStatusUseCase(repo.Status))
 
-	infra.Router.Get().GET("/status", statusHandler.GetOK)
 	r.GET("/status", statusHandler.GetStatus)
 	r.GET("/health", statusHandler.GetOK)
 
