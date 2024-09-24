@@ -10,7 +10,7 @@ import (
 
 func GenerateJWT(username string) (string, error) {
 	cfg := config.GetConfig()
-	expirationTime := time.Now().Add(time.Duration(cfg.App.Security.JWT.Expiration))
+	expirationTime := time.Now().Add(time.Duration(cfg.App.Security.JWT.Expiration) * time.Minute)
 	secretKey := []byte(cfg.App.Security.JWT.Secret)
 
 	claims := &entities.Claims{

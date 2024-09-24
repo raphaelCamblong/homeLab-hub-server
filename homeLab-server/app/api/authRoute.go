@@ -11,7 +11,7 @@ func AuthRoutes(infra *infrastructure.Infrastructure, repo *Repositories) error 
 
 	handler := handlers.NewAuthenticationHandler(usecase.NewAuthenticationUseCase(repo.Auth))
 
-	router.GET("/register", handler.Register)
-	router.GET("/login", handler.Login)
+	router.POST("/register", handler.Register)
+	router.POST("/login", handler.Login)
 	return nil
 }
