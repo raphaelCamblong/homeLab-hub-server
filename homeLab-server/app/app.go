@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"github.com/sirupsen/logrus"
 	"homelab.com/homelab-server/homeLab-server/app/api"
 	"homelab.com/homelab-server/homeLab-server/app/config"
@@ -22,7 +23,7 @@ func NewApp() *App {
 	return &App{
 		Infra: &infrastructure.Infrastructure{
 			Router:              *initRouter(),
-			Cache:               nil, //*initRedis(),
+			Cache:               *initRedis(),
 			Db:                  *initSQLite(),
 			ExternalHttpService: initExternalHttpService(),
 		},
@@ -46,11 +47,11 @@ func (app *App) Start() {
 
 func initRedis() *cache.Database {
 	redisDb, err := cache.NewRedisDatabase()
-	if err != nil {
-		logrus.Error("Failed to connect to Redis: ", err)
-		//panic(err)
-		return nil
+	if errors.Is(err, &cache.ErrNoConnection) {
+		logrus.Error("Failed to connect to Redis: ", err.Error())
+		return &redisDb
 	}
+	logrus.Info("Successfully connected to Redis")
 	return &redisDb
 }
 
