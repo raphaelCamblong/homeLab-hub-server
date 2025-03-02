@@ -13,6 +13,7 @@ type XenOrchestra interface {
 	GetAllHost(*RequestOption) (*[]byte, error)
 	GetHost(string, *RequestOption) (*[]byte, error)
 	getData(string, *RequestOption) (*[]byte, error)
+	GetHealthCheck(*RequestOption) (*[]byte, error)
 }
 
 type (
@@ -92,4 +93,12 @@ func (x *xenOrchestra) getData(path string, requestCtx *RequestOption) (*[]byte,
 	}
 
 	return &bodyBytes, nil
+}
+
+func (x *xenOrchestra) GetHealthCheck(requestCtx *RequestOption) (*[]byte, error) {
+	res, err := x.getData("Health", requestCtx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve power fast data: %w", err)
+	}
+	return res, nil
 }

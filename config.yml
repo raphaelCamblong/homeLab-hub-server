@@ -9,3 +9,19 @@ security:
   jwt:
     secret: fo3i0984rfiubsh98e23eydgysvwyg3rgdsugd
     expiration: 3600
+
+infra:
+  cluster:
+    host:
+      ip:
+        - 192.168.1.x
+        - 192.168.1.x
+        - 192.168.1.x
+        - 192.168.1.x
+  nas:
+    host:
+      ip:
+        -192.168.1.x
+    prometheus:
+      port: 4000
+      token: 'token'

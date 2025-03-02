@@ -20,7 +20,7 @@ type iloRepository struct {
 	cache             cache.Database
 }
 
-func NewThermalRepository(redfishRepository RedfishRepository, cache cache.Database) ILORepository {
+func NewIloRepository(redfishRepository RedfishRepository, cache cache.Database) ILORepository {
 	return &iloRepository{redfishRepository: redfishRepository, cache: cache}
 }
 

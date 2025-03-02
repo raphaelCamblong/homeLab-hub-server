@@ -13,8 +13,10 @@ import (
 
 type RedfishRepository interface {
 	UseSession() error
-	GetThermalData() (*entities.ThermalEntity, error)
-	GetPowerData() (*entities.PowerEntity, error)
+	GetThermalData() (*ilo.ThermalEntity, error)
+	GetPowerData() (*ilo.PowerEntity, error)
+	GetPowerFastData() (*ilo.PowerEntity, error)
+	GetHealthCheck() (*ilo.HealthEntity, error)
 }
 
 type redfishRepository struct {
@@ -96,23 +98,34 @@ func (r *redfishRepository) saveTokenCache(option externalHttpService.RequestOpt
 	return nil
 }
 
-func (r *redfishRepository) GetThermalData() (*entities.ThermalEntity, error) {
-	bodyBytes, err := r.Service.GetThermalData(r.ReqOpt)
+func (r *redfishRepository) GetThermalData() (*ilo.ThermalEntity, error) {
+	thermalData, err := r.Service.GetThermalData(r.ReqOpt)
 	if err != nil {
-		return nil, fmt.Errorf("failed to to retrieve thermal data: %w", err)
+		return nil, fmt.Errorf("failed to retrieve thermal data: %w", err)
 	}
-
-	thermalData, err := entities.UnmarshalThermalEntity(*bodyBytes)
-
-	return thermalData, err
+	return thermalData, nil
 }
 
-func (r *redfishRepository) GetPowerData() (*entities.PowerEntity, error) {
-	bodyByte, err := r.Service.GetPowerData(r.ReqOpt)
+func (r *redfishRepository) GetPowerData() (*ilo.PowerEntity, error) {
+	powerData, err := r.Service.GetPowerData(r.ReqOpt)
 	if err != nil {
-		return nil, fmt.Errorf("failed to to retrieve power data: %w", err)
+		return nil, fmt.Errorf("failed to retrieve power data: %w", err)
 	}
+	return powerData, nil
+}
 
-	powerData, err := entities.UnmarshalPowerEntity(*bodyByte)
-	return powerData, err
+func (r *redfishRepository) GetPowerFastData() (*ilo.PowerEntity, error) {
+	powerFastData, err := r.Service.GetPowerFastData(r.ReqOpt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve power fast data: %w", err)
+	}
+	return powerFastData, nil
+}
+
+func (r *redfishRepository) GetHealthCheck() (*ilo.HealthEntity, error) {
+	healthData, err := r.Service.GetHealthCheck(r.ReqOpt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve health data: %w", err)
+	}
+	return healthData, nil
 }

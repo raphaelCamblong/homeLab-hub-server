@@ -3,15 +3,17 @@ package externalHttpService
 type ExternalHttpService interface {
 	GetRedfish() Redfish
 	GetXenOrchestra() XenOrchestra
+	GetPrometheus() Prometheus
 }
 
 type externalHttpService struct {
-	redfish Redfish
-	xo      XenOrchestra
+	redfish   Redfish
+	xo        XenOrchestra
+	prometheus Prometheus
 }
 
-func NewExternalHttpService(redfish Redfish, xen XenOrchestra) ExternalHttpService {
-	return &externalHttpService{redfish, xen}
+func NewExternalHttpService(redfish Redfish, xen XenOrchestra, prometheus Prometheus) ExternalHttpService {
+	return &externalHttpService{redfish, xen, prometheus}
 }
 
 func (e *externalHttpService) GetRedfish() Redfish {
@@ -20,6 +22,10 @@ func (e *externalHttpService) GetRedfish() Redfish {
 
 func (e *externalHttpService) GetXenOrchestra() XenOrchestra {
 	return e.xo
+}
+
+func (e *externalHttpService) GetPrometheus() Prometheus {
+	return e.prometheus
 }
 
 type (

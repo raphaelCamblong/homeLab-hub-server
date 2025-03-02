@@ -53,9 +53,14 @@ docker-build:
     @echo "Building the docker image..."
     docker build -t {{APP_NAME}}:latest .
 
-docker-run:
+docker-run-remote:
     @echo "Running the docker image..."
-    docker run -p 6000:6000 {{docker_user}}/{{APP_NAME}}:latest
+    docker run -p 6000:6000 {{docker_user}}/{{APP_NAME}}:latest --env-file ./${PWD }.envdocker-run-remote:
+
+docker-run-local:
+    @echo "Running the docker image..."
+    ls -la
+    docker run -p 6000:6000 {{APP_NAME}}:latest --env-file ./.env
 
 docker-publish:
     docker tag {{APP_NAME}}:latest {{docker_user}}/{{APP_NAME}}:latest

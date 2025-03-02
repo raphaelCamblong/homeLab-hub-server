@@ -7,13 +7,15 @@ import (
 	"homelab.com/homelab-server/homeLab-server/app/config"
 	"io"
 	"net/http"
+	"homelab.com/homelab-server/homeLab-server/internal/entities/ilo"
 )
 
 type Redfish interface {
 	CreateSession(credentials *Credentials) (*RequestOption, error)
-	GetThermalData(request *RequestOption) (*[]byte, error)
-	GetPowerFastData(request *RequestOption) (*[]byte, error)
-	GetPowerData(request *RequestOption) (*[]byte, error)
+	GetThermalData(*RequestOption) (*ilo.ThermalEntity, error)
+	GetPowerFastData(*RequestOption) (*ilo.PowerEntity, error)
+	GetPowerData(*RequestOption) (*ilo.PowerEntity, error)
+	GetHealthCheck(*RequestOption) (*ilo.HealthEntity, error)
 }
 
 type Credentials struct {
@@ -83,26 +85,54 @@ func (r *redfish) getData(path string, requestCtx *RequestOption) (*[]byte, erro
 	return &bodyBytes, nil
 }
 
-func (r *redfish) GetThermalData(requestCtx *RequestOption) (*[]byte, error) {
+func (r *redfish) GetThermalData(requestCtx *RequestOption) (*ilo.ThermalEntity, error) {
 	res, err := r.getData("Chassis/1/Thermal", requestCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve thermal data: %w", err)
 	}
-	return res, nil
+
+	var thermalData ilo.ThermalEntity
+	if err := json.Unmarshal(*res, &thermalData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal thermal data: %w", err)
+	}
+	return &thermalData, nil
 }
 
-func (r *redfish) GetPowerData(requestCtx *RequestOption) (*[]byte, error) {
+func (r *redfish) GetPowerData(requestCtx *RequestOption) (*ilo.PowerEntity, error) {
 	res, err := r.getData("Chassis/1/Power/PowerMeter", requestCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve power data: %w", err)
 	}
-	return res, nil
+
+	var powerData ilo.PowerEntity
+	if err := json.Unmarshal(*res, &powerData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power data: %w", err)
+	}
+	return &powerData, nil
 }
 
-func (r *redfish) GetPowerFastData(requestCtx *RequestOption) (*[]byte, error) {
+func (r *redfish) GetPowerFastData(requestCtx *RequestOption) (*ilo.PowerEntity, error) {
 	res, err := r.getData("Chassis/1/Power/FastPowerMeter", requestCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve power fast data: %w", err)
 	}
-	return res, nil
+
+	var powerFastData ilo.PowerEntity
+	if err := json.Unmarshal(*res, &powerFastData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal power fast data: %w", err)
+	}
+	return &powerFastData, nil
+}
+
+func (r *redfish) GetHealthCheck(requestCtx *RequestOption) (*ilo.HealthEntity, error) {
+	res, err := r.getData("Health", requestCtx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve health data: %w", err)
+	}
+
+	var healthData ilo.HealthEntity
+	if err := json.Unmarshal(*res, &healthData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal health data: %w", err)
+	}
+	return &healthData, nil
 }
