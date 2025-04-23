@@ -46,6 +46,19 @@ func (r *networkRepository) ViewDNSSettings() (*entities.DNSSettings, error) {
 	// Implement the logic to view DNS settings
 }
 
-func (r *networkRepository) RunNetworkSpeedTest() (*entities.SpeedTestResult, error) {
-	// Implement the logic to run a network speed test
-} 
+
+func (r *serviceRepository) GetAllService() (*[]entities.ServiceEntity, error) {
+	var services []entities.ServiceEntity
+	if err := r.db.GetDb().Find(&services).Error; err != nil {
+		return nil, err
+	}
+	return &services, nil
+}
+
+func (r *serviceRepository) GetServiceById(id string) (*entities.ServiceEntity, error) {
+	var service entities.ServiceEntity
+	if err := r.db.GetDb().Where("id = ?", id).First(&service).Error; err != nil {
+		return nil, err
+	}
+	return &service, nil
+}

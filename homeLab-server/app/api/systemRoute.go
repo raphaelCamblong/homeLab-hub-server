@@ -12,12 +12,6 @@ func SystemRoutes(infra *infrastructure.Infrastructure, repo *Repositories) erro
 	handler := handlers.NewSystemHandler(usecase.NewSystemUseCase(repo.System))
 
 	router.GET("/info", handler.GetSystemInfo)
-	router.GET("/processes", handler.ListProcesses)
-	router.GET("/services", handler.ListActiveServices)
-	router.GET("/metrics", handler.FetchSystemMetrics)
 	router.GET("/health", handler.CheckHealth)
-	router.POST("/restart", handler.RestartSystem) // restricted
-	router.POST("/shutdown", handler.ShutdownSystem) // restricted
-
 	return nil
 } 

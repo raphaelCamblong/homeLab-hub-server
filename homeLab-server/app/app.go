@@ -8,7 +8,7 @@ import (
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/cache"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
-	"homelab.com/homelab-server/homeLab-server/infrastructure/externalHttpService"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/client"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/router"
 )
 
@@ -72,9 +72,9 @@ func initRouter() *router.Router {
 	return &rtr
 }
 
-func initExternalHttpService() externalHttpService.ExternalHttpService {
+func initExternalHttpService() client.ExternalHttpService {
 	cfg := config.GetConfig()
-	redfish := externalHttpService.NewRedfishInfra(cfg.ExternalServicesCredential.Ilo)
-	xo := externalHttpService.NewXenOrchestraInfra(cfg.ExternalServicesCredential.XO)
-	return externalHttpService.NewExternalHttpService(redfish, xo)
+	redfish := client.NewRedfishInfra(cfg.ExternalServicesCredential.Ilo)
+	xo := client.NewXenOrchestraInfra(cfg.ExternalServicesCredential.XO)
+	return client.NewExternalHttpService(redfish, xo)
 }

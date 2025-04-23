@@ -2,35 +2,53 @@ package usecase
 
 import (
 	"homelab.com/homelab-server/homeLab-server/internal/repositories"
+	"homelab.com/homelab-server/homeLab-server/internal/entities/authentication"
 )
 
 type UserUseCase interface {
-	Login(credentials Credentials) (string, error)
-	Logout() error
+	Login(username, password string) (User, error)
+	Logout(userID string) error
+	GetPermissions(userID string) ([]Permission, error)
 	ViewUserRoles() ([]Role, error)
 	ViewAuditLogs() ([]AuditLog, error)
+	Register(credentials authentication.UserCredentials) (*authentication.JwtToken, error)
 }
 
 type userUseCase struct {
-	userRepository repositories.UserRepository
+	userRepo repositories.UserRepository
 }
 
-func NewUserUseCase(userRepository repositories.UserRepository) UserUseCase {
-	return &userUseCase{userRepository: userRepository}
+func NewUserUseCase(repo repositories.UserRepository) UserUseCase {
+	return &userUseCase{
+		userRepo: repo,
+	}
 }
 
-func (u *userUseCase) Login(credentials Credentials) (string, error) {
-	return u.userRepository.Login(credentials)
+func (u *userUseCase) Login(username, password string) (User, error) {
+	cred := authentication.UserCredentials{Username: username, Password: password}
+	token, err := u.userRepo.Login(cred)
+	if err != nil {
+		return User{}, err
+	}
+	return User{Token: token}, nil
 }
 
-func (u *userUseCase) Logout() error {
-	return u.userRepository.Logout()
+func (u *userUseCase) Logout(userID string) error {
+	return u.userRepo.Logout(userID)
+}
+
+func (u *userUseCase) GetPermissions(userID string) ([]Permission, error) {
+	return []Permission{}, nil
 }
 
 func (u *userUseCase) ViewUserRoles() ([]Role, error) {
-	return u.userRepository.ViewUserRoles()
+	return u.userRepo.ViewUserRoles()
 }
 
 func (u *userUseCase) ViewAuditLogs() ([]AuditLog, error) {
-	return u.userRepository.ViewAuditLogs()
-} 
+	return u.userRepo.ViewAuditLogs()
+}
+
+func (u *userUseCase) Register(credentials authentication.UserCredentials) (*authentication.JwtToken, error) {
+	return u.userRepo.Register(credentials)
+}

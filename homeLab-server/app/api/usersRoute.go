@@ -12,9 +12,13 @@ func UserRoutes(infra *infrastructure.Infrastructure, repo *Repositories) error 
 	handler := handlers.NewUserHandler(usecase.NewUserUseCase(repo.Users))
 
 	router.POST("/login", handler.Login)
-	router.POST("/logout", handler.Logout)
+	router.POST("/logout/:userID", handler.Logout)
 	router.GET("/permissions", handler.ViewUserRoles)
 	router.GET("/audit-logs", handler.ViewAuditLogs)
 
+	Authhandler := handlers.NewAuthenticationHandler(usecase.NewAuthenticationUseCase(repo.Auth))
+
+	router.POST("/register", Authhandler.Register)
+	router.POST("/login", Authhandler.Login)
 	return nil
 } 

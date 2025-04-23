@@ -10,7 +10,6 @@ type Repositories struct {
 	Status       repositories.StatusRepository
 	Ilo          repositories.ILORepository
 	Redfish      repositories.RedfishRepository
-	Prometheus   repositories.PrometheusRepository
 	Cloud        repositories.CloudRepository
 	Auth         repositories.AuthenticationRepository
 	Service      repositories.ServiceRepository
@@ -18,14 +17,14 @@ type Repositories struct {
 
 func NewRepositories(infra *infrastructure.Infrastructure) *Repositories {
 	repo := Repositories{
-		XenOrchestra: repositories.NewXenOrchestraRepository(infra.Cache, infra.ExternalHttpService.GetXenOrchestra(), infra.Db),
+		XenOrchestra: repositories.NewXenOrchestraRepository(infra),
 		Status:       repositories.NewStatusRepository(infra),
-		Redfish:      repositories.NewRedfishRepository(infra.Cache, infra.ExternalHttpService.GetRedfish()),
-		Prometheus:   repositories.NewPrometheusRepository(infra.ExternalHttpService.GetPrometheus()),
-		Auth:         repositories.NewAuthenticationRepository(infra.Db),
-		Service:      repositories.NewServiceRepository(infra.Db),
+		Redfish:      repositories.NewRedfishRepository(infra),
+		Auth:         repositories.NewAuthenticationRepository(infra),
+		Service:      repositories.NewServiceRepository(infra),
 	}
-	repo.Ilo = repositories.NewIloRepository(repo.Redfish, infra.Cache)
-	repo.Cloud = repositories.NewCloudRepository(repo.XenOrchestra)
+
+	repo.Ilo = repositories.NewIloRepository(infra)
+	repo.Cloud = repositories.NewCloudRepository(infra)
 	return &repo
 }

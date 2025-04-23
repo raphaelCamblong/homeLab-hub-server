@@ -25,3 +25,6 @@ func (c cloudUseCase) GetVmsData() (*[]entities.VMEntity, error) {
 func (c cloudUseCase) GetHostData() (*entities.HostEntity, error) {
 	return c.cloudRepository.GetMainHost()
 }
+
+
+// Fo=rom old repositories:

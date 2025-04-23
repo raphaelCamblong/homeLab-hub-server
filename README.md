@@ -48,7 +48,6 @@ cd homelab_server
 /api
 ├── /system
 │   ├── /info                 # Get system info (hostname, OS, uptime)
-│   ├── /services             # List active services (e.g., Prometheus, Node Exporter)
 │   ├── /health               # Check if system is healthy
 │
 ├── /network
@@ -58,6 +57,7 @@ cd homelab_server
 │   ├── /firewall             # View firewall rules (iptables/nftables)
 │   ├── /firewall/rules       # Modify firewall rules
 │   ├── /dns                  # View and modify DNS settings
+│   ├── /services             # View and see available and deployed services
 │
 ├── /nas
 │   ├── /storage              # List storage pools and usage
@@ -67,6 +67,7 @@ cd homelab_server
 │   ├── /files/upload         # Upload a file to the NAS
 │   ├── /files/download       # Download a file
 │   ├── /backup               # Trigger a backup job
+│   ├── /metrics
 │
 ├── /cluster 
 │   ├── /nodes                # List Kubernetes nodes
@@ -78,15 +79,12 @@ cd homelab_server
 │   ├── /events               # Get cluster events
 │   ├── /apply                # Apply a YAML manifest
 │   ├── /delete               # Delete a resource
-│
-├── /monitoring
-│   ├── /prometheus           # Query Prometheus
-│   ├── /grafana              # Get Grafana dashboard data
-│   ├── /alertmanager         # Fetch active alerts
+│   ├── /metrics
 │
 ├── /users
 │   ├── /login                # User authentication
 │   ├── /logout               # Log out user
 │   ├── /permissions          # View user roles & permissions
 │   ├── /audit-logs           # View audit logs (user actions)
+│   ├── /register             # Register a new user
 ```

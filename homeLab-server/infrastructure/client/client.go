@@ -1,4 +1,4 @@
-package externalHttpService
+package client
 
 type ExternalHttpService interface {
 	GetRedfish() Redfish
@@ -6,25 +6,25 @@ type ExternalHttpService interface {
 	GetPrometheus() Prometheus
 }
 
-type externalHttpService struct {
+type client struct {
 	redfish   Redfish
 	xo        XenOrchestra
 	prometheus Prometheus
 }
 
 func NewExternalHttpService(redfish Redfish, xen XenOrchestra, prometheus Prometheus) ExternalHttpService {
-	return &externalHttpService{redfish, xen, prometheus}
+	return &client{redfish, xen, prometheus}
 }
 
-func (e *externalHttpService) GetRedfish() Redfish {
+func (e *client) GetRedfish() Redfish {
 	return e.redfish
 }
 
-func (e *externalHttpService) GetXenOrchestra() XenOrchestra {
+func (e *client) GetXenOrchestra() XenOrchestra {
 	return e.xo
 }
 
-func (e *externalHttpService) GetPrometheus() Prometheus {
+func (e *client) GetPrometheus() Prometheus {
 	return e.prometheus
 }
 

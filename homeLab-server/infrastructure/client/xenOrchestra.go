@@ -1,4 +1,4 @@
-package externalHttpService
+package client
 
 import (
 	"fmt"
