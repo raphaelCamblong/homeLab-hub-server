@@ -1,38 +1,16 @@
 package client
 
+import "time"
+
 type ExternalHttpService interface {
-	GetRedfish() Redfish
-	GetXenOrchestra() XenOrchestra
-	GetPrometheus() Prometheus
 }
 
 type client struct {
-	redfish   Redfish
-	xo        XenOrchestra
-	prometheus Prometheus
+	httpClient HttpClient
 }
 
-func NewExternalHttpService(redfish Redfish, xen XenOrchestra, prometheus Prometheus) ExternalHttpService {
-	return &client{redfish, xen, prometheus}
-}
-
-func (e *client) GetRedfish() Redfish {
-	return e.redfish
-}
-
-func (e *client) GetXenOrchestra() XenOrchestra {
-	return e.xo
-}
-
-func (e *client) GetPrometheus() Prometheus {
-	return e.prometheus
-}
-
-type (
-	RequestOption struct {
-		AuthToken string `json:"AuthToken"`
+func NewExternalHttpService() ExternalHttpService {
+	return &client{
+		httpClient: NewHttpClient(120 * time.Second),
 	}
-	AuthToken struct {
-		AuthToken string `json:"authenticationToken"`
-	}
-)
+}
