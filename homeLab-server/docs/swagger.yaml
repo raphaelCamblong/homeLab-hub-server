@@ -1,0 +1,1359 @@
+basePath: /
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.APIInfo:
+    properties:
+      base_url:
+        type: string
+      openapi_url:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.APIKey:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      expires_at:
+        type: string
+      id:
+        type: integer
+      last_used_at:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.AuditLog:
+    properties:
+      action:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      details:
+        additionalProperties: true
+        type: object
+      id:
+        type: integer
+      ip_address:
+        type: string
+      resource:
+        type: string
+      resource_id:
+        type: string
+      updatedAt:
+        type: string
+      user_agent:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserResponse'
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Job:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      ended_at:
+        type: string
+      id:
+        type: integer
+      pipeline:
+        allOf:
+        - $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+        description: Relationships
+      pipeline_id:
+        type: integer
+      result:
+        type: string
+      run_by:
+        type: string
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Status'
+      steps:
+        items:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Step'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Metadata:
+    properties:
+      environment:
+        type: string
+      owner:
+        type: string
+      version:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.NetworkInfo:
+    properties:
+      domain:
+        type: string
+      ip:
+        type: string
+      port:
+        type: integer
+      url:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Observability:
+    properties:
+      deployed_at:
+        type: string
+      health_status:
+        type: string
+      last_checked_at:
+        type: string
+      latency_ms:
+        type: integer
+      uptime_percent:
+        type: number
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Permission:
+    properties:
+      action:
+        description: create, read, update, delete
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      resource:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      running_jobs:
+        items:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Job'
+        type: array
+      steps:
+        description: Relationships
+        items:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.StepTemplate'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Role:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Permission'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Security:
+    properties:
+      auth_required:
+        type: boolean
+      tls:
+        type: boolean
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity:
+    properties:
+      api_info:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.APIInfo'
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      logo_url:
+        type: string
+      metadata:
+        allOf:
+        - $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Metadata'
+        description: Subcategories
+      name:
+        description: Required core fields
+        type: string
+      namespace:
+        type: string
+      network_info:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.NetworkInfo'
+      observability:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Observability'
+      port:
+        type: integer
+      security:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Security'
+      status:
+        type: string
+      tags:
+        description: Optional
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Status:
+    enum:
+    - pending
+    - running
+    - completed
+    - success
+    - failed
+    - stopped
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusRunning
+    - StatusCompleted
+    - StatusSuccess
+    - StatusFailed
+    - StatusStopped
+  homelab_com_homelab-server_homeLab-server_internal_entities.Step:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      ended_at:
+        type: string
+      execution_order:
+        type: integer
+      id:
+        type: integer
+      job_id:
+        type: integer
+      log:
+        type: string
+      result:
+        type: string
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Status'
+      step_template:
+        $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.StepTemplate'
+      step_template_id:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.StepTemplate:
+    properties:
+      config:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.UserCredentials:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.UserResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      roles:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: balajichandrasekar17@gmail.com
+    name: API Support
+  description: This is task-mgmt api
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: task-mgmt-api
+  version: "1.0"
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.AuthResponse'
+        "400":
+          description: Invalid request format
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: User login
+      tags:
+      - authentication
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate user's current session
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully logged out
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - authentication
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: User registration details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserCredentials'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: JWT token
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.AuthResponse'
+        "400":
+          description: Invalid request format or validation error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Register new user
+      tags:
+      - authentication
+  /api/v1/pipelines:
+    get:
+      consumes:
+      - application/json
+      description: Get all pipeline templates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all pipeline templates
+      tags:
+      - pipelines
+    post:
+      consumes:
+      - application/json
+      description: Create a new pipeline template
+      parameters:
+      - description: Template object
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+      security:
+      - BearerAuth: []
+      summary: Create a new pipeline template
+      tags:
+      - pipelines
+  /api/v1/pipelines/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a pipeline template by ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Template deleted successfully
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete a pipeline template
+      tags:
+      - pipelines
+    get:
+      consumes:
+      - application/json
+      description: Get a single pipeline template by its ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+      security:
+      - BearerAuth: []
+      summary: Get a pipeline template by ID
+      tags:
+      - pipelines
+    put:
+      consumes:
+      - application/json
+      description: Update a pipeline template by ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Template object
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.PipelineTemplate'
+      security:
+      - BearerAuth: []
+      summary: Update a pipeline template
+      tags:
+      - pipelines
+  /api/v1/pipelines/{id}/jobs:
+    get:
+      consumes:
+      - application/json
+      description: Get all execution jobs for a specific pipeline
+      parameters:
+      - description: Pipeline ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Job'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all jobs for a pipeline
+      tags:
+      - pipelines
+    post:
+      consumes:
+      - application/json
+      description: Create a new execution job for a pipeline
+      parameters:
+      - description: Pipeline ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Job'
+      security:
+      - BearerAuth: []
+      summary: Create a new job for a pipeline
+      tags:
+      - pipelines
+  /api/v1/pipelines/{id}/jobs/complete:
+    post:
+      consumes:
+      - application/json
+      description: Mark all running jobs as completed for a specific pipeline
+      parameters:
+      - description: Pipeline ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Jobs completed successfully
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Complete all running jobs for a pipeline
+      tags:
+      - pipelines
+  /api/v1/pipelines/jobs:
+    get:
+      consumes:
+      - application/json
+      description: Get all execution jobs for all pipelines
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Job'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all jobs across all pipelines
+      tags:
+      - pipelines
+  /api/v1/pipelines/jobs/{jobId}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific job by its ID
+      parameters:
+      - description: Job ID
+        in: path
+        name: jobId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Job'
+      security:
+      - BearerAuth: []
+      summary: Get a specific job
+      tags:
+      - pipelines
+  /api/v1/pipelines/jobs/{jobId}/stop:
+    post:
+      consumes:
+      - application/json
+      description: Stop a specific job by its ID
+      parameters:
+      - description: Job ID
+        in: path
+        name: jobId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Job stopped successfully
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Stop a specific job
+      tags:
+      - pipelines
+  /api/v1/pipelines/jobs/stream:
+    get:
+      consumes:
+      - application/json
+      description: Get real-time updates for pipeline jobs via Server-Sent Events
+        (SSE).
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE stream of job updates
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Stream job updates
+      tags:
+      - pipelines
+  /api/v1/services:
+    get:
+      consumes:
+      - application/json
+      description: Get all services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all services
+      tags:
+      - services
+    post:
+      consumes:
+      - application/json
+      description: Create a new service with the provided information
+      parameters:
+      - description: Service object
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity'
+      security:
+      - BearerAuth: []
+      summary: Create a new service
+      tags:
+      - services
+  /api/v1/services/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a service by its ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service deleted successfully
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete a service
+      tags:
+      - services
+    get:
+      consumes:
+      - application/json
+      description: Get a single service by its ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity'
+      security:
+      - BearerAuth: []
+      summary: Get a service by ID
+      tags:
+      - services
+    put:
+      consumes:
+      - application/json
+      description: Update a service with the provided information
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Service object
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity'
+      security:
+      - BearerAuth: []
+      summary: Update a service
+      tags:
+      - services
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of all users
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              page:
+                type: integer
+              page_size:
+                type: integer
+              total:
+                type: integer
+              users:
+                items:
+                  $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserResponse'
+                type: array
+            type: object
+        "500":
+          description: Server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all users
+      tags:
+      - users
+  /api/v1/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserResponse'
+        "404":
+          description: User not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user details
+      tags:
+      - users
+  /api/v1/users/{id}/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all permissions assigned to a specific user through their roles
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Permission'
+            type: array
+        "404":
+          description: User not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user permissions
+      tags:
+      - permissions
+  /api/v1/users/{id}/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles assigned to a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Role'
+            type: array
+        "404":
+          description: User not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user roles
+      tags:
+      - roles
+  /api/v1/users/{id}/roles/{roleId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a specific role from a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role removed successfully
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove role from user
+      tags:
+      - roles
+    post:
+      consumes:
+      - application/json
+      description: Assign a specific role to a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role assigned successfully
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign role to user
+      tags:
+      - roles
+  /api/v1/users/api-keys:
+    get:
+      consumes:
+      - application/json
+      description: Get all API keys for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.APIKey'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - api-keys
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for the authenticated user
+      parameters:
+      - description: API key details
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.APIKey'
+        "400":
+          description: Invalid request format
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create API key
+      tags:
+      - api-keys
+  /api/v1/users/api-keys/{keyId}:
+    delete:
+      consumes:
+      - application/json
+      description: Revoke a specific API key
+      parameters:
+      - description: API Key ID
+        in: path
+        name: keyId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API key revoked successfully
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke API key
+      tags:
+      - api-keys
+  /api/v1/users/audit-logs:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated audit logs for the authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              logs:
+                items:
+                  $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.AuditLog'
+                type: array
+              page:
+                type: integer
+              page_size:
+                type: integer
+              total:
+                type: integer
+            type: object
+        "500":
+          description: Server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user audit logs
+      tags:
+      - audit
+  /api/v1/users/me:
+    get:
+      consumes:
+      - application/json
+      description: Get details of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user details
+      tags:
+      - users
+  /api/v1/users/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Get all available permissions in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Permission'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all permissions
+      tags:
+      - permissions
+  /api/v1/users/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all available roles in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Role'
+            type: array
+        "500":
+          description: Server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all roles
+      tags:
+      - roles
+  /api/v1/users/roles/{id}/permissions/{permissionId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a specific permission from a role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permission ID
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permission removed successfully
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove permission from role
+      tags:
+      - permissions
+    post:
+      consumes:
+      - application/json
+      description: Assign a specific permission to a role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permission ID
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Permission assigned successfully
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign permission to role
+      tags:
+      - permissions
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
