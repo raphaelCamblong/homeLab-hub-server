@@ -1,0 +1,26 @@
+[log]
+level = "info"
+file = "/var/log/homelab-server/app.log"
+
+[core.api]
+host = "127.0.0.1"
+port = 8080
+version = "v1"
+
+[core.api.security]
+enabled = true
+trustedProxies = ["127.0.0.1", "192.168.0.0/24"]
+
+[core.api.security.jwt]
+secret = "fo3i0984rfiubsh98e23eydgysvwyg3rgdsugd"
+expiration = 3600
+
+[client.lambda]
+base_url = "https://api.lambda.local"
+
+[client.database]
+host = "localhost"
+port = 5432
+user = "env"
+password = "env"
+db_name = "env"

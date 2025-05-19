@@ -6,8 +6,11 @@ import (
 )
 
 type ServiceRepository interface {
-	GetAllService() (*[]entities.ServiceEntity, error)
-	GetServiceById(string) (*entities.ServiceEntity, error)
+	List() ([]entities.ServiceEntity, error)
+	Get(id string) (entities.ServiceEntity, error)
+	CreateService(service entities.ServiceEntity) (entities.ServiceEntity, error)
+	UpdateService(id string, service entities.ServiceEntity) (entities.ServiceEntity, error)
+	DeleteService(id string) error
 }
 
 type serviceRepository struct {
@@ -18,18 +21,38 @@ func NewServiceRepository(db database.Database) ServiceRepository {
 	return &serviceRepository{db: db}
 }
 
-func (r *serviceRepository) GetAllService() (*[]entities.ServiceEntity, error) {
+func (r *serviceRepository) List() ([]entities.ServiceEntity, error) {
 	var services []entities.ServiceEntity
-	if err := r.db.GetDb().Find(&services).Error; err != nil {
-		return nil, err
-	}
-	return &services, nil
+	result := r.db.Get().Find(&services)
+	return services, result.Error
 }
 
-func (r *serviceRepository) GetServiceById(id string) (*entities.ServiceEntity, error) {
+func (r *serviceRepository) Get(id string) (entities.ServiceEntity, error) {
 	var service entities.ServiceEntity
-	if err := r.db.GetDb().Where("id = ?", id).First(&service).Error; err != nil {
-		return nil, err
+	result := r.db.Get().First(&service, "id = ?", id)
+	return service, result.Error
+}
+
+func (r *serviceRepository) CreateService(service entities.ServiceEntity) (entities.ServiceEntity, error) {
+	result := r.db.Get().Create(&service)
+	return service, result.Error
+}
+
+func (r *serviceRepository) UpdateService(id string, service entities.ServiceEntity) (entities.ServiceEntity, error) {
+	var existingService entities.ServiceEntity
+	if err := r.db.Get().First(&existingService, "id = ?", id).Error; err != nil {
+		return entities.ServiceEntity{}, err
 	}
-	return &service, nil
+
+	result := r.db.Get().Model(&existingService).Updates(service)
+	if result.Error != nil {
+		return entities.ServiceEntity{}, result.Error
+	}
+
+	return r.Get(id)
+}
+
+func (r *serviceRepository) DeleteService(id string) error {
+	result := r.db.Get().Delete(&entities.ServiceEntity{}, "id = ?", id)
+	return result.Error
 }

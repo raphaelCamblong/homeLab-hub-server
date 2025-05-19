@@ -1,11 +1,9 @@
 package cache
 
 import (
-	"context"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
-	"homelab.com/homelab-server/homeLab-server/app/config"
 )
 
 type redisDatabase struct {
@@ -20,21 +18,22 @@ var (
 func NewRedisDatabase() (Database, error) {
 	once.Do(
 		func() {
-			c := config.GetConfig()
-			client := redis.NewClient(
-				&redis.Options{
-					Addr:     c.CacheDb.Host,
-					Password: *c.CacheDb.Key,
-					DB:       *(c.CacheDb.Channel),
-				},
-			)
+			// c := config.Get()
+			// client := redis.NewClient(
+			// 	&redis.Options{
+			// 		Addr:     "c.CacheDb.Host",
+			// 		Password: "*c.CacheDb.Key",
+			// 		DB:       "*(c.CacheDb.Channel)",
+			// 	},
+			// )
 
-			_, err := client.Ping(context.Background()).Result()
-			if err != nil {
-				redisClient = nil
-				return
-			}
-			redisClient = &redisDatabase{Client: client}
+			// _, err := client.Ping(context.Background()).Result()
+			// if err != nil {
+			// 	redisClient = nil
+			// 	return
+			// }
+			// redisClient = &redisDatabase{Client: client}
+			redisClient = &redisDatabase{Client: nil}
 		},
 	)
 
