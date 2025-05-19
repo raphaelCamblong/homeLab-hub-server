@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Go homelab-server",
+      "type": "go",
+      "request": "launch",
+      "mode": "exec",
+      "program": "${workspaceFolder}/homelab_server",
+      "args": ["-c", "./config.toml"],
+      "env": {},
+      "preLaunchTask": "task: build:debug",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
