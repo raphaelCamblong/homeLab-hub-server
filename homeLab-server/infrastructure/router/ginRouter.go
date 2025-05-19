@@ -2,12 +2,13 @@ package router
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"homelab.com/homelab-server/homeLab-server/infrastructure/router/middleware"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/router/middleware"
+
 	"github.com/gin-gonic/gin"
-	"homelab.com/homelab-server/homeLab-server/app/config"
+	"homelab.com/homelab-server/homeLab-server/init/config"
 )
 
 type GinRouter struct {
@@ -20,9 +21,9 @@ var (
 )
 
 func NewRouter() (Router, error) {
-	c := config.GetConfig()
+	c := config.Get()
 	r := gin.Default()
-	_ = r.SetTrustedProxies(c.App.Security.TrustedProxies)
+	_ = r.SetTrustedProxies(c.Core.API.Security.TrustedProxies)
 	r.Use(middleware.CORSMiddleware())
 	once.Do(
 		func() {
@@ -35,8 +36,8 @@ func NewRouter() (Router, error) {
 }
 
 func (s *GinRouter) Start() {
-	c := config.GetConfig()
-	addr := fmt.Sprintf("%s:%d", c.App.Host, c.App.Port)
+	c := config.Get()
+	addr := fmt.Sprintf("%s:%d", c.Core.API.Host, c.Core.API.Port)
 
 	err := s.Router.Run(addr)
 	if err != nil {
