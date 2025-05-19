@@ -1,0 +1,134 @@
+{
+  "steps": [
+    {
+      "type": "lambda",
+      "name": "Power On HP ProLiant Server",
+      "description": "Initiates power sequence for the HP ProLiant server hardware via the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "power",
+        "args": {
+          "server_ip": "192.168.1.100"
+        }
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Shutdown HP ProLiant Server",
+      "description": "Executes a graceful shutdown sequence for the HP ProLiant server hardware via the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "power",
+        "args": {
+          "server_ip": "192.168.1.100"
+        }
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Check HP ProLiant Server Status",
+      "description": "Queries the server's Integrated Lights-Out (iLO) management interface to verify operational status and health metrics.",
+      "config": {
+        "fn_name": "ilo"
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Activate iLO Management Interface",
+      "description": "Enables the Integrated Lights-Out (iLO) management system on the HP ProLiant server at the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "ilo",
+        "args": {
+          "server_ip": "192.168.1.100"
+        }
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Check if iLO Management Interface is active",
+      "description": "Check if the Integrated Lights-Out (iLO) management system is active on the HP ProLiant server at the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "ilo"
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Deactivate iLO Management Interface",
+      "description": "Disables the Integrated Lights-Out (iLO) management system on the HP ProLiant server to conserve resources when not needed.",
+      "config": {
+        "fn_name": "ilo"
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Check if XenServer is running",
+      "description": "Check if the XenServer hypervisor and node are running at the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "xenserver"
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Deploy Kubernetes Node on XenServer",
+      "description": "Provisions and initializes a new Kubernetes node virtual machine (k8s-node-1) on the XenServer hypervisor at the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "xenserver",
+        "args": {
+          "server_ip": "192.168.1.100",
+          "vm_name": "k8s-node-1"
+        }
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Deploy Minecraft Game Server",
+      "description": "Creates and initializes a Minecraft game server container using Kubernetes on the server at the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "kubectl",
+        "args": {
+          "server_ip": "192.168.1.100"
+        }
+      }
+    },
+    {
+      "type": "lambda",
+      "name": "Terminate Minecraft Game Server",
+      "description": "Gracefully shuts down the Minecraft game server container and releases associated resources on the server at the specified IP address (192.168.1.100).",
+      "config": {
+        "fn_name": "kubectl",
+        "args": {
+          "server_ip": "192.168.1.100"
+        }
+      }
+    }
+  ],
+  "pipelines": [
+    {
+      "name": "Minecraft Server Deployment Pipeline",
+      "description": "Comprehensive workflow to verify system resources, power on infrastructure, activate management interfaces, and deploy a Minecraft game server environment.",
+      "steps": [
+        "Power On HP ProLiant Server",
+        "Check HP ProLiant Server Status",
+        "Activate iLO Management Interface",
+        "Check if XenServer is running",
+        "Deploy Kubernetes Node on XenServer",
+        "Deploy Minecraft Game Server"
+      ]
+    },
+    {
+      "name": "Stop Minecraft Server Pipeline",
+      "description": "Comprehensive workflow to stop the Minecraft game server environment.",
+      "steps": [
+        "Terminate Minecraft Game Server"
+      ]
+    },
+    {
+      "name": "Stop Minecraft Server & cluster node Pipeline",
+      "description": "Comprehensive workflow to stop the Minecraft game server environment and the cluster node on XenServer.",
+      "steps": [
+        "Terminate Minecraft Game Server",
+        "Stop Kubernetes Node on XenServer",
+        "Deactivate iLO Management Interface",
+        "Shutdown HP ProLiant Server"
+      ]
+    }
+  ]
+}
