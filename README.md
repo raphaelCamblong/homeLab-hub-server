@@ -45,46 +45,97 @@ cd homelab_server
 
 ## API:
 ```
-/api
-├── /system
-│   ├── /info                 # Get system info (hostname, OS, uptime)
-│   ├── /health               # Check if system is healthy
-│
-├── /network
-│   ├── /devices              # List devices on the network (DHCP scan)
-│   ├── /interfaces           # List network interfaces and stats
-│   ├── /interfaces/{id}      # Get details for a specific network interface
-│   ├── /firewall             # View firewall rules (iptables/nftables)
-│   ├── /firewall/rules       # Modify firewall rules
-│   ├── /dns                  # View and modify DNS settings
-│   ├── /services             # View and see available and deployed services
-│
-├── /nas
-│   ├── /storage              # List storage pools and usage
-│   ├── /storage/{id}         # Details of a specific storage pool
-│   ├── /zfs                  # ZFS-related metrics (if using ZFS)
-│   ├── /files                # Browse NAS filesystem
-│   ├── /files/upload         # Upload a file to the NAS
-│   ├── /files/download       # Download a file
-│   ├── /backup               # Trigger a backup job
-│   ├── /metrics
-│
-├── /cluster 
-│   ├── /nodes                # List Kubernetes nodes
-│   ├── /pods                 # List running pods
-│   ├── /pods/{namespace}     # List pods in a specific namespace
-│   ├── /services             # List Kubernetes services
-│   ├── /deployments          # List Kubernetes deployments
-│   ├── /logs/{pod}           # Get logs from a specific pod
-│   ├── /events               # Get cluster events
-│   ├── /apply                # Apply a YAML manifest
-│   ├── /delete               # Delete a resource
-│   ├── /metrics
-│
-├── /users
-│   ├── /login                # User authentication
-│   ├── /logout               # Log out user
-│   ├── /permissions          # View user roles & permissions
-│   ├── /audit-logs           # View audit logs (user actions)
-│   ├── /register             # Register a new user
+Public Routes:
+/api/v1/auth/
+  ├── POST /login
+  └── POST /register
+
+Protected Routes (requires JWT):
+/api/v1/auth/
+  └── POST /logout
+
+/api/v1/users/
+  ├── GET /                         (requires users:read)
+  ├── GET /:id                      (requires users:read)
+  ├── GET /:id/roles               (requires roles:read)
+  ├── POST /:id/roles/:roleId      (requires roles:write)
+  └── DELETE /:id/roles/:roleId    (requires roles:write)
+
+/api/v1/api-keys/
+  ├── POST /
+  ├── GET /
+  └── DELETE /:keyId
+
+/api/v1/audit-logs                 (requires audit:read)
+
+/api/v1/services
+  ├──GET    /          - List all services (requires services:read)
+  ├──GET    /:id      - Get a specific service (requires services:read)
+  ├──POST   /         - Create a new service (requires services:write)
+  ├──PUT    /:id      - Update a service (requires services:write)
+  └──DELETE /:id      - Delete a service (requires services:write)
+```
+
+## OpenAPI Documentation
+
+This project uses [swaggo/swag](https://github.com/swaggo/swag) to generate OpenAPI documentation.
+
+ backend api available at: http://127.0.0.1:8080/swagger/index.html#/
+
+### Installation
+
+1. Install swag CLI:
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
+2. Add Swagger dependencies to your project:
+```bash
+go get -u github.com/swaggo/gin-swagger
+go get -u github.com/swaggo/files
+```
+
+### Generate Documentation
+
+1. Add Swagger annotations to your handlers (already done)
+2. Generate Swagger docs:
+```bash
+swag init -g cmd/server/main.go
+```
+
+This will create a `docs` directory containing the generated Swagger documentation.
+
+### Access Documentation UI
+
+After starting the server, access the Swagger UI at:
+```
+http://localhost:8080/swagger/index.html
+```
+
+### Example Swagger Integration
+
+In your main.go:
+```go
+import (
+    "github.com/gin-gonic/gin"
+    swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
+    _ "homelab.com/homelab-server/docs" // generated swagger docs
+)
+
+func main() {
+    r := gin.Default()
+    
+    // Swagger documentation endpoint
+    r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+    
+    // ... rest of your setup
+}
+```
+
+### Updating Documentation
+
+After making changes to the API or annotations, regenerate the documentation:
+```bash
+swag init -g cmd/server/main.go
 ```

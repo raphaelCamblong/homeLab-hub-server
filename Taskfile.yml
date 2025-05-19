@@ -1,0 +1,157 @@
+version: "3"
+
+env:
+  GIN_MODE: debug
+
+vars:
+  APP_NAME: homelab_server
+  SRC_PATH: homelab-server/
+  MAIN_PATH: homelab.com/homelab-server/homeLab-server/cmd
+  MIGRATION_SQL_PATH: homelab.com/homelab-server/homeLab-server/cmd/migrate
+  BUILD_ARGS: -v
+  DOCKER_USER: velocipastor
+
+tasks:
+
+  build:release:
+    desc: Build the application
+    cmds:
+      - echo "Building the application {{.APP_NAME}}..."
+      - go build {{.BUILD_ARGS}} -o {{.APP_NAME}} {{.MAIN_PATH}}
+
+  build:dev:
+    desc: Build the application
+    cmds:
+      - echo "Building the application {{.APP_NAME}}..."
+      - go build {{.BUILD_ARGS}} -o {{.APP_NAME}} {{.MAIN_PATH}}
+
+  build:debug:
+    desc: Build the application in debug mode
+    cmds:
+      - echo "Building the application {{.APP_NAME}} in debug mode..."
+      - go build -gcflags "all=-N -l" -o {{.APP_NAME}} {{.MAIN_PATH}}
+
+  run:
+    desc: Run the application in debug mode
+    deps: [build:release]
+    silent: true
+    cmds:
+      - echo "Running the application in debug mode..."
+      - ./{{.APP_NAME}} -c ./config.toml
+
+  run:debug:
+    desc: Run the application
+    deps: [build:debug]
+    silent: true
+    cmds:
+      - echo "Running the application..."
+      - dlv exec ./{{.APP_NAME}} --headless --listen=:58189 --api-version=2 --accept-multiclient -- -c ./config.toml
+
+  test:
+    desc: Run tests
+    cmds:
+      - echo "Running tests..."
+      - go test ./...
+
+  clean:
+    desc: Clean build directory
+    cmds:
+      - echo "Cleaning build directory..."
+      - go clean
+      - rm -rf {{.APP_NAME}}
+
+  fmt:
+    desc: Format the code
+    cmds:
+      - echo "Formatting the code..."
+      - go fmt ./...
+
+  deps:
+    desc: Download dependencies
+    cmds:
+      - echo "Downloading dependencies..."
+      - go get -u ./...
+
+  tidy:
+    desc: Tidy go.mod
+    cmds:
+      - echo "Tidying up the go.mod file..."
+      - go mod tidy
+
+  docker:build:
+    desc: Build Docker image
+    cmds:
+      - echo "Building the docker image..."
+      - docker build -t {{.APP_NAME}}:latest .
+
+  docker:run-remote:
+    desc: Run Docker image (remote)
+    cmds:
+      - echo "Running the docker image..."
+      - docker run -p 6000:6000 {{.DOCKER_USER}}/{{.APP_NAME}}:latest --env-file ./.env
+
+  docker:run-local:
+    desc: Run Docker image (local)
+    cmds:
+      - echo "Running the docker image locally..."
+      - ls -la
+      - docker run -p 6000:6000 {{.APP_NAME}}:latest --env-file ./.env
+
+  docker:publish:
+    desc: Publish Docker image
+    cmds:
+      - docker tag {{.APP_NAME}}:latest {{.DOCKER_USER}}/{{.APP_NAME}}:latest
+      - docker push {{.DOCKER_USER}}/{{.APP_NAME}}:latest
+
+  helm:install:
+    desc: Install Helm chart
+    cmds:
+      - cd cicd && helm install home-lab-backend ./helm -f ./helm/values.yaml -n home-lab
+
+  helm:delete:
+    desc: Delete Helm release
+    cmds:
+      - cd cicd && helm delete home-lab-backend -n home-lab
+
+# DEV
+  migrate:
+    desc: Run database migration
+    deps: [migrate:auto]
+
+  migrate:auto:
+    desc: Run database migration
+    cmds:
+      - echo "Running migration..."
+      - go run {{.MIGRATION_SQL_PATH}}
+
+  docs:generate:
+    desc: Generate docs
+    dir: '{{.SRC_PATH}}'
+    cmds:
+      - swag init -g cmd/main.go --parseInternal --parseDependency -o docs
+
+  new-feature:
+    desc: Generate boilerplate files for a new feature
+    cmds:
+      - |
+        NAME={{.NAME}}
+        echo "🔧 Generating files for feature: $NAME"
+
+        mkdir -p internal/repositories
+        echo "// ${NAME}Repository.go" > homeLab-server/internal/repositories/${NAME}Repository.go
+
+        mkdir -p internal/handlers
+        echo "// ${NAME}Handler.go" > homeLab-server/internal/handlers/${NAME}Handler.go
+
+        mkdir -p internal/usecase
+        echo "// ${NAME}Usecase.go" > homeLab-server/internal/usecase/${NAME}Usecase.go
+
+        mkdir -p internal/router
+        echo "// ${NAME}Route.go" > homeLab-server/app/api/${NAME}Route.go
+
+        echo "✅ Feature scaffolded: $NAME"
+    vars:
+      NAME:
+        sh: 'echo ${NAME:-""}'
+    requires:
+      vars: ["NAME"]
