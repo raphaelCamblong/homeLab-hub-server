@@ -1,30 +1,30 @@
-package api
+package repositories
 
 import (
 	"homelab.com/homelab-server/homeLab-server/infrastructure"
-	"homelab.com/homelab-server/homeLab-server/internal/repositories"
 )
 
 type Repositories struct {
-	XenOrchestra repositories.XenOrchestraRepository
-	Status       repositories.StatusRepository
-	Ilo          repositories.ILORepository
-	Redfish      repositories.RedfishRepository
-	Cloud        repositories.CloudRepository
-	Auth         repositories.AuthenticationRepository
-	Service      repositories.ServiceRepository
+	User       UserRepository
+	Service    ServiceRepository
+	Pipeline   PipelineRepository
+	Infra      InfrastructureRepository
+	Storage    StorageRepository
+	Network    NetworkRepository
+	Cluster    ClusterRepository
+	Monitoring MonitoringRepository
 }
 
 func NewRepositories(infra *infrastructure.Infrastructure) *Repositories {
 	repo := Repositories{
-		XenOrchestra: repositories.NewXenOrchestraRepository(infra),
-		Status:       repositories.NewStatusRepository(infra),
-		Redfish:      repositories.NewRedfishRepository(infra),
-		Auth:         repositories.NewAuthenticationRepository(infra),
-		Service:      repositories.NewServiceRepository(infra),
+		User:       NewUserRepository(infra.Db),
+		Service:    NewServiceRepository(infra.Db),
+		Pipeline:   NewPipelineRepository(infra.Db, infra.StreamHub, infra.Cron),
+		Infra:      NewInfrastructureRepository(infra.Db),
+		Storage:    NewStorageRepository(),
+		Network:    NewNetworkRepository(),
+		Cluster:    NewClusterRepository(),
+		Monitoring: NewMonitoringRepository(),
 	}
-
-	repo.Ilo = repositories.NewIloRepository(infra)
-	repo.Cloud = repositories.NewCloudRepository(infra)
 	return &repo
 }
