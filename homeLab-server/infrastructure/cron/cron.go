@@ -5,26 +5,27 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/cron/runner"
 )
 
 type Cron struct {
-	crons      map[string]*PipelineRunner
+	crons      map[string]*runner.PipelineRunner
 	runningMux sync.RWMutex
 }
 
 func NewCron() *Cron {
 	return &Cron{
-		crons: make(map[string]*PipelineRunner),
+		crons: make(map[string]*runner.PipelineRunner),
 	}
 }
 
-func (c *Cron) AddCron(name string, cron *PipelineRunner) {
+func (c *Cron) AddCron(name string, cron *runner.PipelineRunner) {
 	c.runningMux.Lock()
 	defer c.runningMux.Unlock()
 	c.crons[name] = cron
 }
 
-func (c *Cron) GetCron(name string) (*PipelineRunner, error) {
+func (c *Cron) GetCron(name string) (*runner.PipelineRunner, error) {
 	c.runningMux.RLock()
 	defer c.runningMux.RUnlock()
 

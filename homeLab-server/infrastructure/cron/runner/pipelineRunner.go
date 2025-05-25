@@ -1,4 +1,4 @@
-package cron
+package runner
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/cron/agent"
 	"homelab.com/homelab-server/homeLab-server/internal/entities"
 )
 
@@ -27,7 +28,7 @@ type StepUpdate struct {
 // PipelineRunner represents a single pipeline execution
 type PipelineRunner struct {
 	job          *entities.Job
-	executors    map[string]StepExecutor
+	executors    map[string]agent.Agent
 	cancelFunc   context.CancelFunc
 	runningMutex sync.RWMutex
 	jobChan      chan JobUpdate
@@ -37,7 +38,7 @@ type PipelineRunner struct {
 func NewPipelineRunner(job *entities.Job) *PipelineRunner {
 	return &PipelineRunner{
 		job:          job,
-		executors:    make(map[string]StepExecutor),
+		executors:    make(map[string]agent.Agent),
 		runningMutex: sync.RWMutex{},
 		jobChan:      make(chan JobUpdate, 1),
 		stepChan:     make(chan StepUpdate, len(job.Steps)),
@@ -54,7 +55,7 @@ func (r *PipelineRunner) GetStepChannel() <-chan StepUpdate {
 
 func (r *PipelineRunner) LoadExecutors() error {
 	for i := range r.job.Steps {
-		executor := CreateExecutor(&r.job.Steps[i])
+		executor := agent.CreateAgent(&r.job.Steps[i])
 		r.executors[r.job.Steps[i].StepTemplate.Name] = executor
 	}
 	return nil
@@ -121,7 +122,7 @@ func (r *PipelineRunner) parseStepConfig(step *entities.Step) (map[string]interf
 }
 
 func (r *PipelineRunner) executeStepWithExecutor(
-	executor StepExecutor,
+	executor agent.Agent,
 	config map[string]interface{},
 	ctx context.Context,
 ) error {
@@ -171,7 +172,6 @@ func (r *PipelineRunner) setStepRunning(step *entities.Step) {
 
 func (r *PipelineRunner) handleStepSuccess(step *entities.Step) {
 	step.Status = entities.StatusSuccess
-	step.Result = step.Log
 	now := time.Now()
 	step.EndedAt = &now
 	r.stepChan <- StepUpdate{Step: step, ParentJob: r.job}
