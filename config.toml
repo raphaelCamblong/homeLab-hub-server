@@ -4,7 +4,7 @@ file = "/var/log/homelab-server/app.log"
 
 [core.api]
 host = "127.0.0.1"
-port = 8080
+port = 6000
 version = "v1"
 
 [core.api.security]
@@ -16,7 +16,7 @@ secret = "fo3i0984rfiubsh98e23eydgysvwyg3rgdsugd"
 expiration = 3600
 
 [client.lambda]
-base_url = "https://api.lambda.local"
+base_url = "https://openfaas.home"
 
 [client.database]
 host = "localhost"
