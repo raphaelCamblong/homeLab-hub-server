@@ -14,7 +14,7 @@ type PipelineTemplate struct {
 
 	// Relationships
 	Steps       []StepTemplate `json:"steps" gorm:"many2many:pipeline_step_templates;"`
-	RunningJobs []Job          `json:"running_jobs" gorm:"foreignKey:PipelineID"`
+	RunningJobs []Job          `json:"running_jobs" gorm:"foreignKey:PipelineID;constraint:OnDelete:CASCADE"`
 }
 
 type StepTemplate struct {

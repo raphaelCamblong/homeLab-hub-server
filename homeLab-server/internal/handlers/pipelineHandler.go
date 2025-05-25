@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"homelab.com/homelab-server/homeLab-server/internal/entities"
 	"homelab.com/homelab-server/homeLab-server/internal/usecase"
 )
@@ -230,11 +229,18 @@ func (h *PipelineHandler) CompleteAllPipelineJobs(c *gin.Context) {
 // @Tags pipelines
 // @Accept json
 // @Produce json
+// @Param status query string false "Filter jobs by status (pending, running, success, failed, stopped)"
 // @Security BearerAuth
 // @Success 200 {array} entities.Job
 // @Router /api/v1/pipelines/jobs [get]
 func (h *PipelineHandler) ListJobs(c *gin.Context) {
-	jobs, err := h.pipelineUseCase.ListJobs()
+	var status *entities.Status
+	if statusStr := c.Query("status"); statusStr != "" {
+		parsedStatus := entities.Status(statusStr)
+		status = &parsedStatus
+	}
+
+	jobs, err := h.pipelineUseCase.ListJobs(status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all jobs"})
 		return
@@ -269,18 +275,15 @@ func (h *PipelineHandler) StreamPipelinesJobs(c *gin.Context) {
 		return
 	}
 
-	logrus.Info("[Handler::StreamPipelinesJobs] Job stream opened")
 	c.Stream(func(w io.Writer) bool {
 		select {
 		case <-ctx.Done():
-			logrus.Info("[Handler::StreamPipelinesJobs] Job stream closed")
 			return false
 		case job, ok := <-updates:
 			if !ok {
 				return false
 			}
 			c.SSEvent("job", job)
-			logrus.Info("[Handler::StreamPipelinesJobs] Job stream updated")
 			return true
 		}
 	})

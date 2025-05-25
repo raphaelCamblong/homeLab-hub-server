@@ -24,7 +24,7 @@ type PipelineUseCase interface {
 	AssociateStepsWithPipeline(pipelineID uint, stepIDs []uint) error
 
 	// Job Management
-	ListJobs() ([]entities.Job, error)
+	ListJobs(status *entities.Status) ([]entities.Job, error)
 	ListJobsByPipeline(pipelineID uint) ([]entities.Job, error)
 	GetJob(jobID uint) (*entities.Job, error)
 	CreateJob(pipelineID uint, runBy string) (*entities.Job, error)
@@ -96,8 +96,8 @@ func (u *pipelineUseCase) AssociateStepsWithPipeline(pipelineID uint, stepIDs []
 }
 
 // Job Management implementations
-func (u *pipelineUseCase) ListJobs() ([]entities.Job, error) {
-	return u.pipelineRepo.ListJobs()
+func (u *pipelineUseCase) ListJobs(status *entities.Status) ([]entities.Job, error) {
+	return u.pipelineRepo.ListJobs(status)
 }
 
 func (u *pipelineUseCase) ListJobsByPipeline(pipelineID uint) ([]entities.Job, error) {

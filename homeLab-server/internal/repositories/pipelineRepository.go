@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/gorm"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/cron"
+	"homelab.com/homelab-server/homeLab-server/infrastructure/cron/runner"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/streaming"
 	"homelab.com/homelab-server/homeLab-server/internal/entities"
@@ -31,7 +32,7 @@ type PipelineRepository interface {
 	AssociateStepsWithPipeline(pipelineID uint, stepIDs []uint) error
 
 	// Job Management
-	ListJobs() ([]entities.Job, error)
+	ListJobs(status *entities.Status) ([]entities.Job, error)
 	ListJobsByPipeline(pipelineID uint) ([]entities.Job, error)
 	GetJob(jobID uint) (*entities.Job, error)
 	CreateJob(pipelineID uint, runBy string) (*entities.Job, error)
@@ -102,23 +103,12 @@ func (r *pipelineRepository) UpdatePipelineTemplate(template *entities.PipelineT
 
 func (r *pipelineRepository) DeletePipelineTemplate(id uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// Delete associated steps first
-		if err := tx.Where("job_id IN (SELECT id FROM jobs WHERE pipeline_id = ?)", id).Delete(&entities.Step{}).Error; err != nil {
+		var pipeline entities.PipelineTemplate
+		if err := tx.Preload("Steps").First(&pipeline, id).Error; err != nil {
 			return err
 		}
 
-		// Delete associated jobs
-		if err := tx.Where("pipeline_id = ?", id).Delete(&entities.Job{}).Error; err != nil {
-			return err
-		}
-
-		// Delete pipeline-step associations
-		if err := tx.Exec("DELETE FROM pipeline_step_templates WHERE pipeline_template_id = ?", id).Error; err != nil {
-			return err
-		}
-
-		// Finally, delete the pipeline template
-		return tx.Delete(&entities.PipelineTemplate{}, id).Error
+		return tx.Select("Steps").Delete(&pipeline).Error
 	})
 }
 
@@ -161,9 +151,15 @@ func (r *pipelineRepository) AssociateStepsWithPipeline(pipelineID uint, stepIDs
 }
 
 // Job Management implementations
-func (r *pipelineRepository) ListJobs() ([]entities.Job, error) {
+func (r *pipelineRepository) ListJobs(status *entities.Status) ([]entities.Job, error) {
 	var jobs []entities.Job
-	return jobs, r.db.Preload("Steps").Preload("Pipeline").Find(&jobs).Error
+	query := r.db.Preload("Steps").Preload("Pipeline").Preload("Steps.StepTemplate")
+
+	if status != nil {
+		query = query.Where("status = ?", *status)
+	}
+
+	return jobs, query.Find(&jobs).Error
 }
 
 func (r *pipelineRepository) ListJobsByPipeline(pipelineID uint) ([]entities.Job, error) {
@@ -234,7 +230,7 @@ func (r *pipelineRepository) CreateJob(pipelineID uint, runBy string) (*entities
 }
 
 func (r *pipelineRepository) scheduleJob(job *entities.Job) error {
-	runner := cron.NewPipelineRunner(job)
+	runner := runner.NewPipelineRunner(job)
 	r.cronManager.AddCron(fmt.Sprintf("job-%d", job.ID), runner)
 
 	if err := runner.LoadExecutors(); err != nil {
@@ -258,10 +254,10 @@ func (r *pipelineRepository) handleJobCompletion(job *entities.Job) {
 	})
 
 	r.StopJob(job.ID)
-	r.DeleteJob(job)
+	// r.DeleteJob(job)
 }
 
-func (r *pipelineRepository) handleJobUpdates(runner *cron.PipelineRunner) {
+func (r *pipelineRepository) handleJobUpdates(runner *runner.PipelineRunner) {
 	jobChan := runner.GetJobChannel()
 	for update := range jobChan {
 		if update.Error != nil {
@@ -282,7 +278,7 @@ func (r *pipelineRepository) handleJobUpdates(runner *cron.PipelineRunner) {
 	}
 }
 
-func (r *pipelineRepository) handleStepUpdates(stepChan <-chan cron.StepUpdate) {
+func (r *pipelineRepository) handleStepUpdates(stepChan <-chan runner.StepUpdate) {
 	for update := range stepChan {
 		if update.Error != nil {
 			logrus.Errorf("Step %d error: %v", update.Step.ID, update.Error)
@@ -319,7 +315,7 @@ func (r *pipelineRepository) StopJob(jobID uint) error {
 }
 
 func (r *pipelineRepository) DeleteJob(job *entities.Job) error {
-	result := r.db.Unscoped().Delete(&job)
+	result := r.db.Delete(&job) //.Unscoped()
 	if result.Error != nil {
 		return fmt.Errorf("failed to delete job: %v", result.Error)
 	}
