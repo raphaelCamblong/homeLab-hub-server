@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: home-lab-pipeline-run
+spec:
+  pipelineRef:
+    name: home-lab-pipeline
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-config
+      secret:
+        secretName: docker-credentials
+  params:
+    - name: git-url
+      value: "https://github.com/raphaelCamblong/homeLab-hub-server.git"
+    - name: image
+      value: "registry.home/velocipastor/homelab-server:latest"
+    - name: version
+      value: "1.0.0"
