@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +12,7 @@ import (
 )
 
 type HttpClient interface {
-	Get(ctx context.Context, url string, headers map[string]string) (*http.Response, error)
+	Get(ctx context.Context, url string, body interface{}, headers map[string]string) (*http.Response, error)
 	Post(ctx context.Context, url string, body interface{}, headers map[string]string) (*http.Response, error)
 	Put(ctx context.Context, url string, body interface{}, headers map[string]string) (*http.Response, error)
 	Delete(ctx context.Context, url string, headers map[string]string) (*http.Response, error)
@@ -26,6 +27,11 @@ func NewHttpClient(timeout time.Duration) HttpClient {
 	return &httpClient{
 		client: &http.Client{
 			Timeout: timeout,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
 		},
 	}
 }
@@ -34,8 +40,13 @@ func (c *httpClient) Do(req *http.Request) (*http.Response, error) {
 	return c.client.Do(req)
 }
 
-func (c *httpClient) Get(ctx context.Context, url string, headers map[string]string) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+func (c *httpClient) Get(ctx context.Context, url string, body interface{}, headers map[string]string) (*http.Response, error) {
+	bodyBytes, err := c.marshalBody(body)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
