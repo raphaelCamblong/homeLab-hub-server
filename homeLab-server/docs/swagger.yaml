@@ -74,6 +74,73 @@ definitions:
       user:
         $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.UserResponse'
     type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.ClusterNode:
+    properties:
+      ip:
+        type: string
+      kubeletVersion:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.ClusterStats:
+    properties:
+      deployments:
+        properties:
+          ready:
+            type: integer
+          total:
+            type: integer
+        type: object
+      nodes:
+        properties:
+          ready:
+            type: integer
+          total:
+            type: integer
+        type: object
+      pods:
+        properties:
+          ready:
+            type: integer
+          total:
+            type: integer
+        type: object
+      statefulSets:
+        properties:
+          ready:
+            type: integer
+          total:
+            type: integer
+        type: object
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Deployment:
+    properties:
+      image:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      readyReplicas:
+        type: integer
+      replicas:
+        type: integer
+    type: object
   homelab_com_homelab-server_homeLab-server_internal_entities.Job:
     properties:
       createdAt:
@@ -124,6 +191,17 @@ definitions:
         type: integer
       url:
         type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.NodeStats:
+    properties:
+      cpuUsage:
+        type: number
+      diskUsage:
+        type: number
+      memoryUsage:
+        type: number
+      podCount:
+        type: integer
     type: object
   homelab_com_homelab-server_homeLab-server_internal_entities.Observability:
     properties:
@@ -182,6 +260,25 @@ definitions:
       updatedAt:
         type: string
     type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Pod:
+    properties:
+      ip:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      nodeName:
+        type: string
+      restartCount:
+        type: integer
+      status:
+        type: string
+    type: object
   homelab_com_homelab-server_homeLab-server_internal_entities.Role:
     properties:
       createdAt:
@@ -207,6 +304,25 @@ definitions:
         type: boolean
       tls:
         type: boolean
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Service:
+    properties:
+      clusterIP:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      ports:
+        items:
+          $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ServicePort'
+        type: array
+      type:
+        type: string
     type: object
   homelab_com_homelab-server_homeLab-server_internal_entities.ServiceEntity:
     properties:
@@ -250,6 +366,17 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.ServicePort:
+    properties:
+      name:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+      targetPort:
+        type: integer
     type: object
   homelab_com_homelab-server_homeLab-server_internal_entities.Status:
     enum:
@@ -338,6 +465,17 @@ definitions:
           type: string
         type: array
       username:
+        type: string
+    type: object
+  homelab_com_homelab-server_homeLab-server_internal_entities.Workflow:
+    properties:
+      endTime:
+        type: string
+      name:
+        type: string
+      startTime:
+        type: string
+      status:
         type: string
     type: object
 host: localhost:8080
@@ -451,6 +589,199 @@ paths:
       summary: Register new user
       tags:
       - authentication
+  /api/v1/cluster/:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics about nodes, pods, deployments, and statefulsets
+        in the cluster
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ClusterStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Get cluster statistics
+      tags:
+      - cluster
+  /api/v1/cluster/deployments:
+    get:
+      consumes:
+      - application/json
+      description: Get information about all deployments in the cluster
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Deployment'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: List all deployments
+      tags:
+      - cluster
+  /api/v1/cluster/nodes:
+    get:
+      consumes:
+      - application/json
+      description: Get information about all nodes in the Kubernetes cluster
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.ClusterNode'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: List all cluster nodes
+      tags:
+      - cluster
+  /api/v1/cluster/nodes/{nodeID}/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed statistics for a specific node in the cluster
+      parameters:
+      - description: Node ID
+        in: path
+        name: nodeID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.NodeStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Get node statistics
+      tags:
+      - cluster
+  /api/v1/cluster/pods:
+    get:
+      consumes:
+      - application/json
+      description: Get information about all running pods across all namespaces
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Pod'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: List all running pods
+      tags:
+      - cluster
+  /api/v1/cluster/pods/{namespace}:
+    get:
+      consumes:
+      - application/json
+      description: Get information about all pods in a specific namespace
+      parameters:
+      - description: Namespace name
+        in: path
+        name: namespace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Pod'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: List pods in namespace
+      tags:
+      - cluster
+  /api/v1/cluster/services:
+    get:
+      consumes:
+      - application/json
+      description: Get information about all services in the cluster
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Service'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: List all services
+      tags:
+      - cluster
+  /api/v1/cluster/workflows:
+    get:
+      consumes:
+      - application/json
+      description: Get information about all workflows in the cluster
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/homelab_com_homelab-server_homeLab-server_internal_entities.Workflow'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: List all workflows
+      tags:
+      - cluster
   /api/v1/pipelines:
     get:
       consumes:
@@ -641,6 +972,11 @@ paths:
       consumes:
       - application/json
       description: Get all execution jobs for all pipelines
+      parameters:
+      - description: Filter jobs by status (pending, running, success, failed, stopped)
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:

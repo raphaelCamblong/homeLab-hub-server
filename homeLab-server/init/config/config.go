@@ -49,9 +49,14 @@ type LambdaConfig struct {
 	BaseURL string `toml:"base_url"`
 }
 
+type K8sConfig struct {
+	Kubeconfig string `toml:"kubeconfig"`
+}
+
 type ClientConfig struct {
 	Lambda   LambdaConfig   `toml:"lambda"`
 	Database DatabaseConfig `toml:"database"`
+	K8s      K8sConfig      `toml:"k8s"`
 }
 
 type Config struct {
@@ -70,15 +75,39 @@ func DefaultConfig() *Config {
 }
 
 func (c *Config) FlattenConfig(dotEnvConfig DotEnvConfig) error {
-	c.Client.Database.Host = dotEnvConfig.DbHost
-	port, err := strconv.Atoi(dotEnvConfig.DbPort)
-	if err != nil {
-		return fmt.Errorf("❌ Failed to convert db port to int: %w", err)
+	logrus.Debugf("TOML Database config: Host=%s, Port=%d, User=%s, DBName=%s",
+		c.Client.Database.Host, c.Client.Database.Port, c.Client.Database.User, c.Client.Database.DBName)
+	logrus.Debugf("Environment variables: DB_HOST=%s, DB_PORT=%s, DB_USER=%s, DB_NAME=%s",
+		dotEnvConfig.DbHost, dotEnvConfig.DbPort, dotEnvConfig.DbUser, dotEnvConfig.DbName)
+
+	// Only override TOML values if environment variables are set
+	if dotEnvConfig.DbHost != "" {
+		c.Client.Database.Host = dotEnvConfig.DbHost
+		logrus.Debug("Overriding Host with environment variable")
 	}
-	c.Client.Database.Port = port
-	c.Client.Database.User = dotEnvConfig.DbUser
-	c.Client.Database.Password = dotEnvConfig.DbPassword
-	c.Client.Database.DBName = dotEnvConfig.DbName
+	if dotEnvConfig.DbPort != "" {
+		port, err := strconv.Atoi(dotEnvConfig.DbPort)
+		if err != nil {
+			return fmt.Errorf("❌ Failed to convert db port to int: %w", err)
+		}
+		c.Client.Database.Port = port
+		logrus.Debug("Overriding Port with environment variable")
+	}
+	if dotEnvConfig.DbUser != "" {
+		c.Client.Database.User = dotEnvConfig.DbUser
+		logrus.Debug("Overriding User with environment variable")
+	}
+	if dotEnvConfig.DbPassword != "" {
+		c.Client.Database.Password = dotEnvConfig.DbPassword
+		logrus.Debug("Overriding Password with environment variable")
+	}
+	if dotEnvConfig.DbName != "" {
+		c.Client.Database.DBName = dotEnvConfig.DbName
+		logrus.Debug("Overriding DBName with environment variable")
+	}
+
+	logrus.Debugf("Final Database config: Host=%s, Port=%d, User=%s, DBName=%s",
+		c.Client.Database.Host, c.Client.Database.Port, c.Client.Database.User, c.Client.Database.DBName)
 	return nil
 }
 

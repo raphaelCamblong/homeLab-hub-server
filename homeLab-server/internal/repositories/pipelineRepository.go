@@ -237,6 +237,17 @@ func (r *pipelineRepository) scheduleJob(job *entities.Job) error {
 		return err
 	}
 
+	r.streamHub.Publish(streaming.Event{
+		Type: streaming.NotificationEvent,
+		Data: entities.Notification{
+			Title:    "Job Scheduled",
+			Message:  fmt.Sprintf("Job %d scheduled", job.ID),
+			Severity: "low",
+			Source:   "pipeline",
+			Type:     "info",
+		},
+	})
+
 	go r.handleJobUpdates(runner)
 	go r.handleStepUpdates(runner.GetStepChannel())
 
@@ -251,6 +262,17 @@ func (r *pipelineRepository) handleJobCompletion(job *entities.Job) {
 	r.streamHub.Publish(streaming.Event{
 		Type: streaming.JobEvent,
 		Data: *job,
+	})
+
+	r.streamHub.Publish(streaming.Event{
+		Type: streaming.NotificationEvent,
+		Data: entities.Notification{
+			Title:    "Job Completed",
+			Message:  fmt.Sprintf("Job %s completed", job.Pipeline.Name),
+			Severity: "low",
+			Source:   "pipeline",
+			Type:     "info",
+		},
 	})
 
 	r.StopJob(job.ID)

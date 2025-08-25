@@ -63,7 +63,8 @@ func (Processor *Processor) Start() {
 	routes.ServiceRoutes(Processor.Infra, Processor.Repositories.Service)
 	routes.PipelinesRoutes(Processor.Infra, Processor.Repositories.Pipeline)
 	routes.DocsRoutes(Processor.Infra)
+	routes.ClusterRoutes(Processor.Infra, Processor.Repositories.Cluster)
+	routes.NotificationRoutes(Processor.Infra, Processor.Repositories.Notification)
 
-	logrus.Info("Starting router")
 	Processor.Infra.Router.Start()
 }

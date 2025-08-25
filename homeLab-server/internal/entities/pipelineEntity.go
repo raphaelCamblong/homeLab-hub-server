@@ -48,7 +48,7 @@ type Step struct {
 	StepTemplateID uint       `json:"step_template_id" gorm:"not null;index"`
 	Status         Status     `json:"status" gorm:"type:varchar(20);not null;default:'pending'"`
 	Log            string     `json:"log" gorm:"type:text"`
-	Result         string     `json:"result" gorm:"type:text"`
+	Result         Result     `json:"result" gorm:"type:varchar(20);not null;default:'pending'"`
 	StartedAt      *time.Time `json:"started_at"`
 	EndedAt        *time.Time `json:"ended_at"`
 	ExecutionOrder int        `json:"execution_order" gorm:"not null"`
@@ -67,6 +67,15 @@ const (
 	StatusSuccess   Status = "success"
 	StatusFailed    Status = "failed"
 	StatusStopped   Status = "stopped"
+)
+
+type Result string
+
+const (
+	ResultSuccess Result = "success"
+	ResultFailed  Result = "failed"
+	ResultSkipped Result = "skipped"
+	ResultPending Result = "pending"
 )
 
 // Helper functions

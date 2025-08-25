@@ -1,57 +1,61 @@
 package repositories
 
+import (
+	"homelab.com/homelab-server/homeLab-server/infrastructure/client"
+	"homelab.com/homelab-server/homeLab-server/internal/entities"
+)
+
 type ClusterRepository interface {
-	// ListClusterNodes() ([]entities.ClusterNode, error)
-	// ListRunningPods() ([]entities.Pod, error)
-	// ListPodsInNamespace(namespace string) ([]entities.Pod, error)
-	// ListClusterServices() ([]entities.Service, error)
-	// ListClusterDeployments() ([]entities.Deployment, error)
-	// GetPodLogs(pod string) (string, error)
-	// GetClusterEvents() ([]entities.Event, error)
-	// ApplyYAMLManifest(manifest string) error
-	// DeleteResource(resourceID string) error
+	ListClusterNodes() ([]entities.ClusterNode, error)
+	GetNodeStats(nodeID string) (entities.NodeStats, error)
+	ListRunningPods() ([]entities.Pod, error)
+	ListWorkflows() ([]entities.Workflow, error)
+	ListPodsInNamespace(namespace string) ([]entities.Pod, error)
+	ListClusterServices() ([]entities.Service, error)
+	ListClusterDeployments() ([]entities.Deployment, error)
+	GetClusterStats() (*entities.ClusterStats, error)
 }
 
 type ClustersRepository struct {
-	// Add any necessary fields, such as database connections
+	k8sClient *client.K8sClient
 }
 
-func NewClusterRepository() ClusterRepository {
-	return &ClustersRepository{}
+func NewClusterRepository(k8sClient *client.K8sClient) ClusterRepository {
+	return &ClustersRepository{
+		k8sClient: k8sClient,
+	}
 }
 
-// func (r *ClustersRepository) ListClusterNodes() ([]entities.ClusterNode, error) {
-// 	// Implement the logic to list Cluster nodes
-// }
+func (r *ClustersRepository) ListClusterNodes() ([]entities.ClusterNode, error) {
+	return r.k8sClient.ListNodes()
+}
 
-// func (r *ClustersRepository) ListRunningPods() ([]entities.Pod, error) {
-// 	// Implement the logic to list running pods
-// }
+func (r *ClustersRepository) GetNodeStats(nodeID string) (entities.NodeStats, error) {
+	return r.k8sClient.GetNodeStats(nodeID)
+}
 
-// func (r *ClustersRepository) ListPodsInNamespace(namespace string) ([]entities.Pod, error) {
-// 	// Implement the logic to list pods in a namespace
-// }
+func (r *ClustersRepository) ListRunningPods() ([]entities.Pod, error) {
+	return r.k8sClient.ListPods("")
+}
 
-// func (r *ClustersRepository) ListClusterServices() ([]entities.Service, error) {
-// 	// Implement the logic to list Cluster services
-// }
+func (r *ClustersRepository) ListWorkflows() ([]entities.Workflow, error) {
+	// Note: This is a placeholder. In a real implementation, you would need to
+	// implement workflow listing based on your workflow engine (e.g., Argo, Tekton)
+	return []entities.Workflow{}, nil
+}
 
-// func (r *ClustersRepository) ListClusterDeployments() ([]entities.Deployment, error) {
-// 	// Implement the logic to list Cluster deployments
-// }
+func (r *ClustersRepository) ListPodsInNamespace(namespace string) ([]entities.Pod, error) {
+	return r.k8sClient.ListPods(namespace)
+}
 
-// func (r *ClustersRepository) GetPodLogs(pod string) (string, error) {
-// 	// Implement the logic to get pod logs
-// }
+func (r *ClustersRepository) ListClusterServices() ([]entities.Service, error) {
+	return r.k8sClient.ListServices("")
+}
 
-// func (r *ClustersRepository) GetClusterEvents() ([]entities.Event, error) {
-// 	// Implement the logic to get cluster events
-// }
+func (r *ClustersRepository) ListClusterDeployments() ([]entities.Deployment, error) {
+	return r.k8sClient.ListDeployments("")
+}
 
-// func (r *ClustersRepository) ApplyYAMLManifest(manifest string) error {
-// 	// Implement the logic to apply a YAML manifest
-// }
-
-// func (r *ClustersRepository) DeleteResource(resourceID string) error {
-// 	// Implement the logic to delete a resource
-// }
+func (r *ClustersRepository) GetClusterStats() (*entities.ClusterStats, error) {
+	return r.k8sClient.GetClusterStats()
+}
