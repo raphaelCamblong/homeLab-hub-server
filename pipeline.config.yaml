@@ -1,0 +1,343 @@
+providers:
+  - name: "omv-exporter"
+    steps:
+    - type: lambda
+      name: "Get SMART Info"
+      description: Retrieves S.M.A.R.T. information from OMV disks.
+      config:
+        fn_name: function/omv-exporter
+        args:
+          action: get_smart_info
+
+    - type: lambda
+      name: "Get System Stats"
+      description: Retrieves system-level statistics from OMV.
+      config:
+        fn_name: function/omv-exporter
+        args:
+          action: get_system_stats
+
+    - type: lambda
+      name: "Get SMART Disk List"
+      description: Lists all disks with available S.M.A.R.T. data.
+      config:
+        fn_name: function/omv-exporter
+        args:
+          action: get_smart_disk_list
+
+    - type: lambda
+      name: "Get ZFS Stats"
+      description: Retrieves ZFS filesystem statistics.
+      config:
+        fn_name: function/omv-exporter
+        args:
+          action: get_zfs_stats
+
+    - type: lambda
+      name: "Get ZFS Pools"
+      description: Lists all ZFS pools configured in OMV.
+      config:
+        fn_name: function/omv-exporter
+        args:
+          action: get_zfs_pools
+
+  - name: "network-controller"
+    steps:
+    - type: lambda
+      name: "[Network-Controller] Discover Devices"
+      description: Scans the network and returns available devices.
+      config:
+        fn_name: function/network-controller
+        args:
+          action: discover_devices
+
+    - type: lambda
+      name: "[Network-Controller] Get Device plug"
+      description: Retrieves detailed information for a specific device.
+      config:
+        fn_name: function/network-controller
+        args:
+          action: get_device
+          ip_address: 192.168.1.10
+
+    - type: lambda
+      name: "[Network-Controller] Turn On Device plug"
+      description: Sends a signal to turn on the specified device.
+      config:
+        fn_name: function/network-controller
+        args:
+          action: turn_on
+          ip_address: 192.168.1.10
+
+    - type: lambda+wait
+      name: "[Network-Controller + W] Turn On Server Device plug"
+      description: Sends a signal to turn on the specified device and wait until it's on.
+      config:
+        fn_name: function/network-controller
+        args:
+          action: turn_on
+          ip_address: 192.168.1.10
+          success_condition_key: "device.status"
+          success_condition_value: "on"
+          interval: 5
+          retry: 3
+
+    - type: lambda
+      name: "[Network-Controller] Turn Off Device plug"
+      description: Sends a signal to turn off the specified device.
+      config:
+        fn_name: function/network-controller
+        args:
+          action: turn_off
+
+  - name: "xen-orchestra-controller"
+    steps:
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Get VMs"
+      description: Retrieves a list of all virtual machines in Xen Orchestra.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: get_vms
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Get VM"
+      description: Retrieves details for a specific VM.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: get_vm
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Get VM State"
+      description: Gets the current state of a specified VM.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: get_vm_state
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Start VM"
+      description: Starts a virtual machine.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: start_vm
+          vm_name: "k8s-node-1"
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Stop VM"
+      description: Stops a virtual machine.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: stop_vm
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Restart VM"
+      description: Restarts a virtual machine.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: restart_vm
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller]  Suspend VM"
+      description: Suspends a virtual machine.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: suspend_vm
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Resume VM"
+      description: Resumes a suspended virtual machine.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: resume_vm
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Get VM Metrics"
+      description: Retrieves metrics and performance data for a VM.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: get_vm_metrics
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Get Host Info"
+      description: Retrieves information about the Xen Orchestra host.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: get_host_info
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Shutdown Host"
+      description: Powers off the Xen Orchestra host machine.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: shutdown_host
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Reboot Host"
+      description: Reboots the Xen Orchestra host.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: reboot_host
+
+    - type: lambda
+      name: "[Xen-Orchestra-Controller] Wait for VM State"
+      description: Waits for a virtual machine to reach a given state.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: wait_for_vm_state
+
+    - type: lambda+wait
+      name: "[Xen-Orchestra-Controller + W] Is Host Running"
+      description: Checks if the Xen Orchestra host is running.
+      config:
+        fn_name: function/xen-orchestra-controller
+        args:
+          action: get_vms
+          success_condition_key: "vms"
+          success_condition_value: "on"
+          interval: 10
+          retry: 10
+
+  - name: "hpe-lambda"
+    steps:
+    - type: lambda
+      name: "[HPE-Lambda] Get System Info"
+      description: Retrieves system information from the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: get_system_info
+
+    - type: lambda
+      name: "[HPE-Lambda] Get Power State"
+      description: Gets the current power state of the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: get_power_state
+
+    - type: lambda+wait
+      name: "[HPE-Lambda] Turn On Server and wait until it's on"
+      description: Powers on the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: turn_on
+          success_condition_key: "power_state"
+          success_condition_value: "on"
+          interval: 10
+          retry: 10
+
+    - type: lambda
+      name: "[HPE-Lambda] Turn On Server"
+      description: Powers on the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: turn_on
+
+    - type: lambda
+      name: "[HPE-Lambda] Turn Off Server"
+      description: Powers off the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: turn_off
+
+    - type: lambda
+      name: "[HPE-Lambda] Get Thermal Info"
+      description: Retrieves thermal statistics from the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: get_thermal_info
+
+    - type: lambda
+      name: "[HPE-Lambda] Reboot Server"
+      description: Reboots the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: reboot
+
+    - type: lambda
+      name: "[HPE-Lambda] Get Health Status"
+      description: Checks overall hardware health of the HP server.
+      config:
+        fn_name: function/hpe-lambda
+        args:
+          action: get_health_status
+
+  - name: "Kube-Controller"
+    steps:
+    - type: kubernetes
+      name: "[Kube-Controller] Is Node Ready"
+      description: Checks if the node is ready in the Kubernetes cluster and wait until it's ready.
+      config:
+        fn_name: function/kube-controller
+        args:
+          node_name: "game-server"
+
+    - type: kubernetes
+      name: "Drain node"
+      description: Drain a node from the Kubernetes cluster.
+      config:
+        fn_name: function/kube-controller
+        args:
+          node_name: "game-server"
+
+    - type: kubernetes
+      name: "Deploy Satisfactory"
+      description: Deploy Satisfactory game server to the Kubernetes cluster.
+      config:
+        fn_name: function/kube-controller
+        args:
+          node_name: "game-server"
+
+    - type: kubernetes
+      name: "Shutdown Satisfactory"
+      description: Shutdown Satisfactory game server in the Kubernetes cluster.
+      config:
+        fn_name: function/kube-controller
+        args:
+          node_name: "game-server"
+
+pipelines:
+  - name: "Deploy Game Server Satisfactory"
+    description: Complete initialization of system hardware, network, virtualization, and monitoring tools.
+    steps:
+      - "[Network-Controller + W] Turn On Server Device plug"
+      - "[HPE-Lambda + W] Turn On Server"
+      - "[HPE-Lambda] Get System Info"
+      - "[Xen-Orchestra-Controller + W] Is Host Running"
+      - "[Xen-Orchestra-Controller] Start VM"
+      - "[Kube-Controller] Is Node Ready"
+      - "[Kube-Controller] Deploy Satisfactory"
+
+  - name: "Start Hpe Server compute node"
+    description: Start the Hpe Server compute node.
+    steps:
+      - "[Network-Controller + W] Turn On Server Device plug"
+      - "[HPE-Lambda + W] Turn On Server"
+      - "[HPE-Lambda] Get System Info"
+      - "[Xen-Orchestra-Controller + W] Is Host Running"
+      - "[Xen-Orchestra-Controller] Start VM"
+
+  - name: "Shutdown Game Server Satisfactory"
+    description: Shutdown the Game Server Satisfactory.
+    steps:
+      - "[Kube-Controller] Shutdown Satisfactory"
+      # - "[Xen-Orchestra-Controller] Stop VM"
+      - "[HPE-Lambda] Turn Off Server"
+      - "[Network-Controller] Turn Off Server Device plug"

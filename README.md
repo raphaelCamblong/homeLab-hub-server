@@ -139,3 +139,13 @@ After making changes to the API or annotations, regenerate the documentation:
 ```bash
 swag init -g cmd/server/main.go
 ```
+
+
+## Pipeline config:
+
+args:
+  timeout
+  interval
+  retry
+  condition
+  + whatever for the lambda

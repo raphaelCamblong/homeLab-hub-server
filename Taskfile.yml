@@ -124,6 +124,12 @@ tasks:
       - echo "Running migration..."
       - go run {{.MIGRATION_SQL_PATH}}
 
+  migrate:pipeline:
+    desc: Run pipeline migration
+    cmds:
+      - echo "Running pipeline migration..."
+      - go run {{.MIGRATION_SQL_PATH}}/seeder/pipeline
+
   docs:generate:
     desc: Generate docs
     dir: '{{.SRC_PATH}}'
@@ -135,10 +141,10 @@ tasks:
     cmds:
       - |
         NAME={{.NAME}}
-        echo "🔧 Generating files for feature: $NAME"
+        echo "🔧 Generating files for feature: {{.NAME}}"
 
         mkdir -p internal/repositories
-        echo "// ${NAME}Repository.go" > homeLab-server/internal/repositories/${NAME}Repository.go
+        echo "// {{.NAME}}Repository.go" > homeLab-server/internal/repositories/{{.NAME}}Repository.go
 
         mkdir -p internal/handlers
         echo "// ${NAME}Handler.go" > homeLab-server/internal/handlers/${NAME}Handler.go
@@ -150,8 +156,5 @@ tasks:
         echo "// ${NAME}Route.go" > homeLab-server/app/api/${NAME}Route.go
 
         echo "✅ Feature scaffolded: $NAME"
-    vars:
-      NAME:
-        sh: 'echo ${NAME:-""}'
     requires:
       vars: ["NAME"]
