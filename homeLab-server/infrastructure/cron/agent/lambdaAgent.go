@@ -41,7 +41,22 @@ func (e *LambdaAgent) Execute(ctx context.Context, config map[string]interface{}
 	if err := json.Unmarshal(resp, &response); err != nil {
 		return *e.step, err
 	}
-	e.step.Log += fmt.Sprintf("\n%v", response)
-	e.step.Result = fmt.Sprintf("Lambda step %s completed with response", e.step.StepTemplate.Name)
+	e.step.Log += fmt.Sprintf("\n\n%v", response)
+
+	if e.isSuccess(config, response) {
+		e.step.Result = entities.ResultSuccess
+	} else {
+		e.step.Result = entities.ResultFailed
+	}
+
 	return *e.step, nil
+}
+
+func (e *LambdaAgent) isSuccess(config map[string]interface{}, response map[string]interface{}) bool {
+	successConditionKey := config["success_condition_key"].(string)
+	successConditionValue := config["success_condition_value"].(string)
+	if successConditionKey == "" || successConditionValue == "" {
+		return false
+	}
+	return response[successConditionKey] == successConditionValue
 }

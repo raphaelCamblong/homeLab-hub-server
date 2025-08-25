@@ -138,12 +138,12 @@ func (r *PipelineRunner) executeStepWithExecutor(
 func (r *PipelineRunner) handleCancellation(step *entities.Step) error {
 	now := time.Now()
 	step.Status = entities.StatusStopped
-	step.Result = "Job stopped"
+	step.Result = entities.ResultSkipped
 	step.EndedAt = &now
 	r.stepChan <- StepUpdate{Step: step, ParentJob: r.job}
 
 	r.job.Status = entities.StatusStopped
-	r.job.Result = "Job stopped"
+	r.job.Result = string(entities.ResultSkipped)
 	r.job.EndedAt = &now
 	r.jobChan <- JobUpdate{Job: r.job}
 
@@ -152,7 +152,7 @@ func (r *PipelineRunner) handleCancellation(step *entities.Step) error {
 
 func (r *PipelineRunner) handleStepError(step *entities.Step, err error) {
 	step.Status = entities.StatusFailed
-	step.Result = err.Error()
+	step.Result = entities.ResultFailed
 	r.stepChan <- StepUpdate{Step: step, ParentJob: r.job, Error: err}
 }
 

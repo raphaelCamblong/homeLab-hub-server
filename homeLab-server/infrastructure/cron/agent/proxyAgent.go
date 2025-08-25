@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"homelab.com/homelab-server/homeLab-server/internal/entities"
@@ -29,10 +30,12 @@ func (e *AgentProxy) Execute(ctx context.Context, config map[string]interface{})
 	e.step.EndedAt = &endnow
 	if err != nil {
 		e.step.Status = entities.StatusFailed
-		e.step.Result = err.Error()
+		e.step.Log += fmt.Sprintf("\nError: %v", err)
+		e.step.Result = entities.ResultFailed
 		return *e.step, err
 	}
-	e.step.Status = entities.StatusSuccess
+	e.step.Status = entities.StatusCompleted
+	e.step.Result = entities.ResultSuccess
 	return *e.step, nil
 }
 

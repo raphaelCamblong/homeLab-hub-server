@@ -8,9 +8,10 @@ import (
 type EventType string
 
 const (
-	ActionEvent EventType = "action"
-	JobEvent    EventType = "job"
-	StepEvent   EventType = "step"
+	ActionEvent       EventType = "action"
+	JobEvent          EventType = "job"
+	StepEvent         EventType = "step"
+	NotificationEvent EventType = "notification"
 )
 
 type Event struct {

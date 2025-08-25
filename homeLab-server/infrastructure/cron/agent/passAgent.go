@@ -19,7 +19,7 @@ func NewPassAgent(step *entities.Step) Agent {
 func (e *PassAgent) Execute(ctx context.Context, config map[string]interface{}) (entities.Step, error) {
 	logrus.Infof("Test step %s running...", e.step.StepTemplate.Name)
 	time.Sleep(5 * time.Second)
-	e.step.Result = "Test step completed"
+	e.step.Result = entities.ResultSuccess
 	e.step.Log += "\nTest step completed"
 	return *e.step, nil
 }

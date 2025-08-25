@@ -21,8 +21,8 @@ func CreateAgent(step *entities.Step) Agent {
 
 	agent, exists := agents[step.StepTemplate.Type]
 	if !exists {
-		logrus.Warnf("No agent found for step type: %s, using default lambda agent", step.StepTemplate.Name)
-		agent = agents["lambda"]
+		logrus.Warnf("No agent found for step type: %s, using default pass agent", step.StepTemplate.Name)
+		agent = agents["pass"]
 	}
 
 	return NewAgentProxy(step, agent)

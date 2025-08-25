@@ -10,12 +10,11 @@ import (
 )
 
 type ConfigWaitStep struct {
-	Timeout   int    `json:"timeout"`
-	Interval  int    `json:"interval"`
-	Count     int    `json:"count"`
-	Condition string `json:"condition"`
-	timeout   time.Duration
-	interval  time.Duration
+	Timeout  int `json:"timeout"`
+	Interval int `json:"interval"`
+	Retry    int `json:"retry"`
+	timeout  time.Duration
+	interval time.Duration
 }
 
 type WaitAgent struct {
@@ -41,20 +40,22 @@ func (e *WaitAgent) Execute(ctx context.Context, config map[string]interface{}) 
 	for {
 		if e.checkCount() {
 			e.step.Log += "\nWait step failed after %d attempts"
-			return *e.step, fmt.Errorf("wait step failed after %d attempts", e.cfg.Count)
+			e.step.Result = entities.ResultFailed
+			return *e.step, fmt.Errorf("wait step failed after %d attempts", e.cfg.Retry)
 		}
 		if e.checkTimeout() {
 			e.step.Log += "\nWait step timed out after %d seconds"
+			e.step.Result = entities.ResultFailed
 			return *e.step, fmt.Errorf("wait step timed out after %d seconds", e.cfg.Timeout)
 		}
 		if e.try(ctx, config) {
 			break
 		}
 		e.sleep()
-		e.cfg.Count--
+		e.cfg.Retry--
 	}
 	e.step.Status = entities.StatusSuccess
-	e.step.Result = "Wait step completed successfully"
+	e.step.Result = entities.ResultSuccess
 	return *e.step, nil
 }
 
@@ -62,14 +63,14 @@ func (e *WaitAgent) loadConfig() error {
 	if err := json.Unmarshal([]byte(e.step.StepTemplate.Config), &e.cfg); err != nil {
 		return err
 	}
-	if e.cfg.Count <= 0 {
-		e.cfg.Count = 4
+	if e.cfg.Retry <= 0 {
+		e.cfg.Retry = 4
 	}
 	if e.cfg.Interval <= 0 {
 		e.cfg.Interval = 5
 	}
 	if e.cfg.Timeout <= 0 {
-		e.cfg.Timeout = int(5 * time.Minute / time.Second)
+		e.cfg.Timeout = int(7 * time.Minute / time.Second)
 	}
 	e.cfg.timeout = time.Duration(e.cfg.Timeout) * time.Second
 	e.cfg.interval = time.Duration(e.cfg.Interval) * time.Second
@@ -81,8 +82,8 @@ func (e *WaitAgent) try(ctx context.Context, config map[string]interface{}) bool
 		return false
 	}
 	e.step.Log += "\nTrying to execute agent"
-	_, err := e.agent.Execute(ctx, config)
-	return err == nil
+	stepR, err := e.agent.Execute(ctx, config)
+	return err == nil && stepR.Result == entities.ResultSuccess
 }
 
 func (e *WaitAgent) sleep() error {
@@ -91,7 +92,7 @@ func (e *WaitAgent) sleep() error {
 }
 
 func (e *WaitAgent) checkCount() bool {
-	return e.cfg.Count > 0
+	return e.cfg.Retry > 0
 }
 
 func (e *WaitAgent) checkTimeout() bool {

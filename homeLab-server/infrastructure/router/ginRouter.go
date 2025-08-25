@@ -43,6 +43,7 @@ func (s *GinRouter) Start() {
 	if err != nil {
 		logrus.Errorf("failed to iniate gin router %d", err)
 	}
+	logrus.Infof("gin router started on %s", addr)
 }
 
 func (s *GinRouter) Get() *gin.Engine {
