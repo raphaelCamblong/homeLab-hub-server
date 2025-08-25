@@ -5,7 +5,6 @@ import (
 	"homelab.com/homelab-server/homeLab-server/cmd/migrate/seed"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/init/config"
-	"homelab.com/homelab-server/homeLab-server/internal/entities"
 )
 
 func main() {
@@ -25,32 +24,7 @@ func main() {
 }
 
 func AutoMigrate(db database.Database) {
-	logrus.Info("Migrating database...")
-	logrus.Info("Running AutoMigrate...")
-	db.Get().AutoMigrate(
-		&entities.UserEntity{},
-		&entities.AuditLog{},
-		&entities.Role{},
-		&entities.Permission{},
-		&entities.APIKey{},
-		&entities.ServiceEntity{},
-		&entities.InfrastructureEntity{},
-		&entities.PipelineTemplate{},
-		&entities.StepTemplate{},
-		&entities.Job{},
-		&entities.Step{},
-		&entities.ServiceEntity{},
-		&entities.Notification{},
-	)
-
-	logrus.Info("Done.")
-
-	// Seeding logic
-	seed.SeedPermissions(db)
-	seed.SeedRoles(db)
-	seed.SeedAdminUser(db)
 	seed.SeedPipelines(db)
-	seed.SeedServices(db)
 
 	logrus.Info("✅ Migration and seeding complete.")
 }

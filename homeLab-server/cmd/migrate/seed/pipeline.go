@@ -2,244 +2,217 @@ package seed
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
+	"gorm.io/gorm"
 	"homelab.com/homelab-server/homeLab-server/infrastructure/database"
 	"homelab.com/homelab-server/homeLab-server/internal/entities"
+	"homelab.com/homelab-server/homeLab-server/internal/repositories"
 )
 
 type ConfigFile struct {
-	Steps     []StepConfig     `json:"steps"`
-	Pipelines []PipelineConfig `json:"pipelines"`
+	Providers []ProviderConfig `yaml:"providers"`
+	Pipelines []PipelineConfig `yaml:"pipelines"`
+}
+
+type ProviderConfig struct {
+	Name  string       `yaml:"name"`
+	Steps []StepConfig `yaml:"steps"`
 }
 
 type StepConfig struct {
-	Type        string                 `json:"type"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Config      map[string]interface{} `json:"config"`
+	Type        string                 `yaml:"type"`
+	Name        string                 `yaml:"name"`
+	Description string                 `yaml:"description"`
+	Config      map[string]interface{} `yaml:"config"`
 }
 
 type PipelineConfig struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Steps       []string `json:"steps"`
+	Name        string   `yaml:"name"`
+	Description string   `yaml:"description"`
+	Steps       []string `yaml:"steps"`
 }
 
-func LoadDataFromJson(db database.Database) {
-	jsonFile, err := os.Open("pipeline.config.json")
+// loadConfigFile reads and parses the YAML configuration file
+func loadConfigFile(filePath string) (*ConfigFile, error) {
+	yamlFile, err := os.Open(filePath)
 	if err != nil {
-		logrus.Errorf("❌ Failed to open pipeline.config.json: %v", err)
-		return
+		return nil, err
 	}
-	defer jsonFile.Close()
+	defer yamlFile.Close()
 
-	byteValue, err := io.ReadAll(jsonFile)
+	byteValue, err := io.ReadAll(yamlFile)
 	if err != nil {
-		logrus.Errorf("❌ Failed to read pipeline.config.json: %v", err)
-		return
+		return nil, err
 	}
 
 	var config ConfigFile
-	if err := json.Unmarshal(byteValue, &config); err != nil {
-		logrus.Errorf("❌ Failed to parse pipeline.config.json: %v", err)
-		return
+	if err := yaml.Unmarshal(byteValue, &config); err != nil {
+		return nil, err
 	}
 
-	// Create step templates from the JSON data
-	for _, stepConfig := range config.Steps {
-		// Check if step already exists
-		var existingStep entities.StepTemplate
-		result := db.Get().Where("name = ?", stepConfig.Name).First(&existingStep)
-		if result.Error == nil {
-			logrus.Infof("⏩ Step %s already exists, skipping creation", stepConfig.Name)
-			continue
-		}
+	return &config, nil
+}
 
-		configJSON, err := json.Marshal(stepConfig.Config)
-		if err != nil {
-			logrus.Errorf("❌ Failed to marshal step config for %s: %v", stepConfig.Name, err)
-			continue
-		}
+// findOrCreateStep handles finding or creating a step template
+func findOrCreateStep(db *gorm.DB, repo repositories.PipelineRepository, stepConfig StepConfig, shouldUpdate bool) (*entities.StepTemplate, error) {
+	// Direct database query for better performance
+	var existingStep entities.StepTemplate
+	result := db.Where("name = ?", stepConfig.Name).First(&existingStep)
 
-		step := entities.StepTemplate{
-			Type:        stepConfig.Type,
-			Name:        stepConfig.Name,
-			Description: stepConfig.Description,
-			Config:      string(configJSON),
-		}
-
-		if err := db.Get().Create(&step).Error; err != nil {
-			logrus.Errorf("❌ Failed to create step %s: %v", step.Name, err)
-			continue
-		}
-		logrus.Infof("✅ Created step template: %s", step.Name)
+	configJSON, err := json.Marshal(stepConfig.Config)
+	if err != nil {
+		return nil, err
 	}
 
-	// Create pipeline templates from the JSON data
+	if result.Error == nil {
+		if shouldUpdate {
+			existingStep.Type = stepConfig.Type
+			existingStep.Description = stepConfig.Description
+			existingStep.Config = string(configJSON)
+			if err := repo.UpdateStepTemplate(&existingStep); err != nil {
+				return nil, err
+			}
+			logrus.Infof("✅ Updated step template: %s", existingStep.Name)
+		} else {
+			logrus.Infof("⏩ Step %s already exists, skipping", stepConfig.Name)
+		}
+		return &existingStep, nil
+	}
+
+	step := &entities.StepTemplate{
+		Type:        stepConfig.Type,
+		Name:        stepConfig.Name,
+		Description: stepConfig.Description,
+		Config:      string(configJSON),
+	}
+
+	if err := repo.CreateStepTemplate(step); err != nil {
+		return nil, err
+	}
+	logrus.Infof("✅ Created step template: %s", step.Name)
+	return step, nil
+}
+
+// findOrCreatePipeline handles finding or creating a pipeline template
+func findOrCreatePipeline(db *gorm.DB, repo repositories.PipelineRepository, pipelineConfig PipelineConfig, shouldUpdate bool) (*entities.PipelineTemplate, error) {
+	// Direct database query for better performance
+	var existingPipeline entities.PipelineTemplate
+	result := db.Where("name = ?", pipelineConfig.Name).First(&existingPipeline)
+
+	if result.Error == nil {
+		if shouldUpdate {
+			existingPipeline.Description = pipelineConfig.Description
+			if err := repo.UpdatePipelineTemplate(&existingPipeline); err != nil {
+				return nil, err
+			}
+			logrus.Infof("✅ Updated pipeline template: %s", existingPipeline.Name)
+		} else {
+			logrus.Infof("⏩ Pipeline %s already exists, skipping", pipelineConfig.Name)
+		}
+		return &existingPipeline, nil
+	}
+
+	pipeline := &entities.PipelineTemplate{
+		Name:        pipelineConfig.Name,
+		Description: pipelineConfig.Description,
+	}
+
+	if err := repo.CreatePipelineTemplate(pipeline); err != nil {
+		return nil, err
+	}
+	logrus.Infof("✅ Created pipeline template: %s", pipeline.Name)
+	return pipeline, nil
+}
+
+// associateStepsWithPipeline handles the association between pipeline and steps
+func associateStepsWithPipeline(db *gorm.DB, repo repositories.PipelineRepository, pipeline *entities.PipelineTemplate, stepNames []string) error {
+	// Direct database query for better performance
+	var steps []entities.StepTemplate
+	if err := db.Where("name IN ?", stepNames).Find(&steps).Error; err != nil {
+		return err
+	}
+
+	// Collect step IDs
+	stepIDs := make([]uint, len(steps))
+	for i, step := range steps {
+		stepIDs[i] = step.ID
+	}
+
+	// Associate steps with pipeline using repository
+	if err := repo.AssociateStepsWithPipeline(pipeline.ID, stepIDs); err != nil {
+		return err
+	}
+
+	logrus.Infof("✅ Associated %d steps with pipeline %s", len(stepIDs), pipeline.Name)
+	return nil
+}
+
+func LoadDataFromYaml(db database.Database, shouldUpdate bool, config *ConfigFile) {
+	// Initialize repository and get direct DB instance
+	repo := repositories.NewPipelineRepository(db, nil, nil)
+	gormDB := db.Get()
+
+	// Process steps from all providers
+	for _, provider := range config.Providers {
+		logrus.Infof("📦 Processing provider: %s", provider.Name)
+		for _, stepConfig := range provider.Steps {
+			if _, err := findOrCreateStep(gormDB, repo, stepConfig, shouldUpdate); err != nil {
+				logrus.Errorf("❌ Failed to process step %s: %v", stepConfig.Name, err)
+			}
+		}
+	}
+
+	// Process pipelines
 	for _, pipelineConfig := range config.Pipelines {
-		// Check if pipeline already exists
-		var existingPipeline entities.PipelineTemplate
-		result := db.Get().Where("name = ?", pipelineConfig.Name).First(&existingPipeline)
-		if result.Error == nil {
-			logrus.Infof("⏩ Pipeline %s already exists, skipping creation", pipelineConfig.Name)
+		pipeline, err := findOrCreatePipeline(gormDB, repo, pipelineConfig, shouldUpdate)
+		if err != nil {
+			logrus.Errorf("❌ Failed to process pipeline %s: %v", pipelineConfig.Name, err)
 			continue
 		}
 
-		pipeline := entities.PipelineTemplate{
-			Name:        pipelineConfig.Name,
-			Description: pipelineConfig.Description,
+		if err := associateStepsWithPipeline(gormDB, repo, pipeline, pipelineConfig.Steps); err != nil {
+			logrus.Errorf("❌ Failed to associate steps with pipeline %s: %v", pipeline.Name, err)
 		}
+	}
+}
 
-		if err := db.Get().Create(&pipeline).Error; err != nil {
-			logrus.Errorf("❌ Failed to create pipeline template %s: %v", pipeline.Name, err)
-			continue
+func CreatePipelineForSingleStep(db database.Database, config *ConfigFile) {
+	repo := repositories.NewPipelineRepository(db, nil, nil)
+	gormDB := db.Get()
+
+	// Process steps from all providers
+	for _, provider := range config.Providers {
+		for _, stepConfig := range provider.Steps {
+			pipelineConfig := PipelineConfig{
+				Name:        fmt.Sprintf("[Single] %s", stepConfig.Name),
+				Description: fmt.Sprintf("Single step pipeline for %s", stepConfig.Name),
+				Steps:       []string{stepConfig.Name},
+			}
+
+			pipeline, err := findOrCreatePipeline(gormDB, repo, pipelineConfig, true)
+			if err != nil {
+				logrus.Errorf("❌ Failed to create single step pipeline for %s: %v", stepConfig.Name, err)
+				continue
+			}
+
+			if err := associateStepsWithPipeline(gormDB, repo, pipeline, pipelineConfig.Steps); err != nil {
+				logrus.Errorf("❌ Failed to associate step with single step pipeline %s: %v", pipeline.Name, err)
+			}
 		}
-
-		// Associate steps with the pipeline
-		for _, stepName := range pipelineConfig.Steps {
-			var step entities.StepTemplate
-			if err := db.Get().Where("name = ?", stepName).First(&step).Error; err != nil {
-				logrus.Errorf("❌ Failed to find step %s for pipeline %s: %v", stepName, pipeline.Name, err)
-				continue
-			}
-
-			// Check if association already exists
-			var steps []entities.StepTemplate
-			if err := db.Get().Model(&pipeline).Association("Steps").Find(&steps); err != nil {
-				logrus.Errorf("❌ Failed to get existing steps for pipeline %s: %v", pipeline.Name, err)
-				continue
-			}
-
-			exists := false
-			for _, s := range steps {
-				if s.ID == step.ID {
-					exists = true
-					break
-				}
-			}
-			if exists {
-				logrus.Infof("⏩ Step %s already associated with pipeline %s, skipping", stepName, pipeline.Name)
-				continue
-			}
-
-			if err := db.Get().Model(&pipeline).Association("Steps").Append(&step); err != nil {
-				logrus.Errorf("❌ Failed to associate step %s with pipeline %s: %v", stepName, pipeline.Name, err)
-				continue
-			}
-			logrus.Infof("✅ Associated step %s with pipeline %s", stepName, pipeline.Name)
-		}
-
-		logrus.Infof("✅ Created pipeline template: %s with %d steps", pipeline.Name, len(pipelineConfig.Steps))
 	}
 }
 
 func SeedPipelines(db database.Database) {
-	LoadDataFromJson(db)
-	// First, create step templates that can be reused
-	// commonSteps := []entities.StepTemplate{
-	// 	{Type: "lambda", Name: "Check disk space", Description: "Verify available disk space", Config: `{"min_space_gb": 10}`},
-	// 	{Type: "lambda", Name: "Initialize", Description: "Initialize the process", Config: `{"timeout_seconds": 30}`},
-	// 	{Type: "lambda", Name: "Generate report", Description: "Create execution report", Config: `{"format": "json"}`},
-	// 	{Type: "lambda", Name: "Clean up", Description: "Clean up temporary files and resources", Config: `{"delete_temp": true}`},
-	// }
-
-	// for _, step := range commonSteps {
-	// 	if err := db.Get().Create(&step).Error; err != nil {
-	// 		logrus.Errorf("❌ Failed to create common step %s: %v", step.Name, err)
-	// 	}
-	// }
-
-	// // Create pipeline-specific step templates
-	// pipelineSteps := map[string][]entities.StepTemplate{
-	// 	"System Update": {
-	// 		{Name: "Check for updates", Description: "Check for available system updates", Config: `{"update_type": "security"}`},
-	// 		{Name: "Download packages", Description: "Download update packages", Config: `{"concurrent_downloads": 3}`},
-	// 		{Name: "Install updates", Description: "Install downloaded updates", Config: `{"auto_restart": false}`},
-	// 	},
-	// 	"Database Backup": {
-	// 		{Name: "Stop services", Description: "Stop database services", Config: `{"services": ["postgresql", "mysql"]}`},
-	// 		{Name: "Create backup", Description: "Create database backup files", Config: `{"compression": true}`},
-	// 		{Name: "Upload to storage", Description: "Upload backup to remote storage", Config: `{"storage_type": "s3"}`},
-	// 		{Name: "Restart services", Description: "Restart database services", Config: `{"timeout_seconds": 60}`},
-	// 	},
-	// 	"Network Security Scan": {
-	// 		{Name: "Initialize scanner", Description: "Initialize security scanner", Config: `{"scanner": "nmap"}`},
-	// 		{Name: "Port scan", Description: "Scan network ports", Config: `{"port_range": "1-65535"}`},
-	// 		{Name: "Vulnerability check", Description: "Check for vulnerabilities", Config: `{"severity": "high"}`},
-	// 	},
-	// 	"Docker Container Cleanup": {
-	// 		{Name: "List unused resources", Description: "List unused Docker resources", Config: `{"resource_types": ["containers", "images", "volumes"]}`},
-	// 		{Name: "Stop unused containers", Description: "Stop inactive containers", Config: `{"timeout_seconds": 30}`},
-	// 		{Name: "Remove containers", Description: "Remove stopped containers", Config: `{"force": false}`},
-	// 		{Name: "Remove unused images", Description: "Remove unused Docker images", Config: `{"keep_tags": ["latest"]}`},
-	// 		{Name: "Clean volumes", Description: "Clean unused Docker volumes", Config: `{"preserve_named": true}`},
-	// 	},
-	// 	"SSL Certificate Renewal": {
-	// 		{Name: "Check certificate expiry", Description: "Check SSL certificate expiration", Config: `{"warn_days": 30}`},
-	// 		{Name: "Generate new certificates", Description: "Generate new SSL certificates", Config: `{"provider": "letsencrypt"}`},
-	// 		{Name: "Backup old certificates", Description: "Backup existing certificates", Config: `{"backup_location": "/etc/ssl/backup"}`},
-	// 		{Name: "Install new certificates", Description: "Install new SSL certificates", Config: `{"restart_services": true}`},
-	// 		{Name: "Reload web server", Description: "Reload web server configuration", Config: `{"graceful": true}`},
-	// 	},
-	// 	"System Health Check": {
-	// 		{Name: "Check CPU usage", Description: "Monitor CPU utilization", Config: `{"threshold_percent": 80}`},
-	// 		{Name: "Check memory usage", Description: "Monitor memory utilization", Config: `{"threshold_percent": 90}`},
-	// 		{Name: "Check disk usage", Description: "Monitor disk utilization", Config: `{"threshold_percent": 85}`},
-	// 		{Name: "Check service status", Description: "Check running services status", Config: `{"critical_services": ["nginx", "docker"]}`},
-	// 		{Name: "Check log files", Description: "Analyze system log files", Config: `{"error_patterns": ["error", "critical", "failed"]}`},
-	// 	},
-	// }
-
-	// // Create pipeline templates with their specific steps
-	// pipelines := []entities.PipelineTemplate{
-	// 	{
-	// 		Name:        "System Update",
-	// 		Description: "Update system packages and dependencies",
-	// 	},
-	// 	{
-	// 		Name:        "Database Backup",
-	// 		Description: "Perform a full backup of all databases",
-	// 	},
-	// 	{
-	// 		Name:        "Network Security Scan",
-	// 		Description: "Perform a comprehensive network security scan",
-	// 	},
-	// 	{
-	// 		Name:        "Docker Container Cleanup",
-	// 		Description: "Clean up unused Docker containers, images, and volumes",
-	// 	},
-	// 	{
-	// 		Name:        "SSL Certificate Renewal",
-	// 		Description: "Check and renew SSL certificates",
-	// 	},
-	// 	{
-	// 		Name:        "System Health Check",
-	// 		Description: "Perform a comprehensive system health check",
-	// 	},
-	// }
-
-	// for _, pipeline := range pipelines {
-	// 	if err := db.Get().Create(&pipeline).Error; err != nil {
-	// 		logrus.Errorf("❌ Failed to create pipeline template %s: %v", pipeline.Name, err)
-	// 		continue
-	// 	}
-
-	// 	steps := pipelineSteps[pipeline.Name]
-	// 	for _, step := range steps {
-	// 		if err := db.Get().Create(&step).Error; err != nil {
-	// 			logrus.Errorf("❌ Failed to create step %s for pipeline %s: %v", step.Name, pipeline.Name, err)
-	// 			continue
-	// 		}
-	// 	}
-
-	// 	if err := db.Get().Model(&pipeline).Association("Steps").Append(steps); err != nil {
-	// 		logrus.Errorf("❌ Failed to associate steps with pipeline %s: %v", pipeline.Name, err)
-	// 		continue
-	// 	}
-
-	// 	logrus.Infof("✅ Created pipeline template: %s with %d steps", pipeline.Name, len(steps))
-	// }
+	config, err := loadConfigFile("pipeline.config.yaml")
+	if err != nil {
+		logrus.Errorf("❌ Failed to load pipeline.config.yaml: %v", err)
+		return
+	}
+	LoadDataFromYaml(db, true, config)
+	CreatePipelineForSingleStep(db, config)
 }

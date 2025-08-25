@@ -9,6 +9,11 @@ import (
 )
 
 func SeedServices(db database.Database) {
+	if db.Get().Migrator().HasTable(&entities.ServiceEntity{}) {
+		logrus.Info("✅ Services table already exists")
+		return
+	}
+
 	logrus.Info("Seeding services...")
 
 	now := time.Now()

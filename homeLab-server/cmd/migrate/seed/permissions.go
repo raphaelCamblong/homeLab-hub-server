@@ -10,6 +10,11 @@ import (
 
 // SeedPermissions creates all CRUD permissions for the app's resources
 func SeedPermissions(db database.Database) {
+	if db.Get().Migrator().HasTable(&entities.Permission{}) {
+		logrus.Info("✅ Permissions table already exists")
+		return
+	}
+
 	verbs := []string{"create", "read", "update", "delete", "execute"}
 	resources := []string{
 		"users",
@@ -44,6 +49,11 @@ func SeedPermissions(db database.Database) {
 
 // SeedRoles seeds core roles and associates full permissions to admin
 func SeedRoles(db database.Database) {
+	if db.Get().Migrator().HasTable(&entities.Role{}) {
+		logrus.Info("✅ Roles table already exists")
+		return
+	}
+
 	roles := []entities.Role{
 		{Name: "admin", Description: "Administrator role with full access"},
 		{Name: "user", Description: "Regular user role with limited access"},
