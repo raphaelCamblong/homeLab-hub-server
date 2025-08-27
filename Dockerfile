@@ -1,4 +1,4 @@
-FROM golang:1.25.0-alpine3.22 AS builder
+FROM golang:1.24.6-alpine3.22 AS builder
 WORKDIR /app
 
 # Install dependencies
@@ -13,7 +13,7 @@ COPY . .
 
 RUN task build:release
 
-FROM alpine:latest as final
+FROM alpine:3.22 as final
 WORKDIR /app
 
 EXPOSE 6000
