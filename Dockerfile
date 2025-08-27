@@ -2,16 +2,15 @@ FROM golang:1.24.6-alpine3.22 AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY go.mod go.sum ./
-RUN go mod download
 
-ARG TASKFILE_VERSION=latest
-
-RUN go install github.com/go-task/task/v3/cmd/task@${TASKFILE_VERSION}
+ARG APP_NAME=homelab_server
+ARG MAIN_PATH=homelab.com/homelab-server/homeLab-server/cmd
+ARG BUILD_ARGS=-v
 
 COPY . .
 
-RUN task build:release
+COPY go.mod go.sum ./
+RUN go build {{.BUILD_ARGS}} -o {{.APP_NAME}} {{.MAIN_PATH}}
 
 FROM alpine:3.22 as final
 WORKDIR /app
